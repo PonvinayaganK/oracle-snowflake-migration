@@ -203,4 +203,3 @@ RAG_QUERY_GENERATION_PROMPT = ChatPromptTemplate.from_messages([
     List of relevant keywords/concepts:
     """)
 ])
-

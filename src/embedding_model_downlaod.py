@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer
 import os
 
 model_name_to_download = "all-MiniLM-L6-v2"
-local_path = "../data/embedding_models" # This matches LOCAL_EMBEDDING_MODEL_PATH in settings.py
+local_path = "data/embedding_models" # This matches LOCAL_EMBEDDING_MODEL_PATH in settings.py
 
 os.makedirs(local_path, exist_ok=True)
 # This downloads the model weights and saves them to the specified path

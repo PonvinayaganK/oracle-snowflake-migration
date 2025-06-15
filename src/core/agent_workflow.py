@@ -3,22 +3,20 @@ import logging
 import json # Import for handling JSON response from LLM for decomposition
 from typing import TypedDict, List, Dict
 from langchain_core.messages import BaseMessage
-from langgraph.graph import StateGraph, END, START
-from langchain_core.runnables import RunnableConfig # Import RunnableConfig
+from langgraph.graph import StateGraph, END # START is implicitly handled
+from langchain_core.runnables import RunnableConfig
+from langchain_core.documents import Document
 
 # Import prompts from the updated prompts file
 from src.core.prompts import (
     CODE_GENERATION_PROMPT_TEMPLATE, OPTIMIZATION_REFLECTION_PROMPT_TEMPLATE,
-    INITIAL_ANALYSIS_PROMPT, RAG_QUERY_GENERATION_PROMPT, # RAG_QUERY_GENERATION_PROMPT is still used for LLM's internal thinking
+    INITIAL_ANALYSIS_PROMPT, RAG_QUERY_GENERATION_PROMPT,
     VIEW_DECOMPOSITION_PROMPT_TEMPLATE, VIEW_PART_TRANSLATION_PROMPT_TEMPLATE,
     VIEW_ASSEMBLY_PROMPT_TEMPLATE
 )
-# No longer importing HybridRetriever as ChromaDB is removed
-# from src.rag.retriever import HybridRetriever
-# No longer importing snowflake_connector for RAG here, as it's not a direct part of this RAG
-# from src.data_processing.snowflake_connector import get_rag_context_from_snowflake_schema
+from src.rag.retriever import HybridRetriever # Import HybridRetriever
 
-from src.utils.exceptions import LLMError, RAGError
+from src.utils.exceptions import LLMError, RAGError, ConfigurationError # ConfigurationError added
 from src.config import VIEW_DECOMPOSITION_THRESHOLD # Import the threshold
 
 logger = logging.getLogger(__name__)
@@ -27,7 +25,7 @@ logger = logging.getLogger(__name__)
 class AgentState(TypedDict):
     oracle_object_code: str
     snowflake_guidelines: str
-    sample_snowflake_code: str # Reverted to a single string containing all samples
+    sample_snowflake_code: List[Document] # Reverted back to List[Document]
     generated_snowflake_code: str
     reflection: str
     errors: List[str]
@@ -91,6 +89,7 @@ def validate_snowflake_syntax(snowflake_code: str, object_type: str) -> bool: # 
     return is_valid
 
 # --- Graph Nodes ---
+# Removed @retry_llm_call() decorator as per request
 def initial_analysis_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing initial_analysis_node for {state['object_type']}")
     logger.debug(f"initial_analysis_node received config: {config}")
@@ -105,44 +104,48 @@ def initial_analysis_node(state: AgentState, config: RunnableConfig) -> AgentSta
         state["current_step"] = f"Initial Analysis of {state['object_type']} Complete"
         logger.info(f"Initial Analysis: {response.content[:200]}...")
         return state
-    except KeyError as e:
-        logger.error(f"KeyError in initial_analysis_node: Missing config key {e}", exc_info=True)
-        raise LLMError(f"LLM configuration missing: Key {e} not found in node config. Ensure LLM is passed correctly to graph.stream().")
-    except Exception as e:
+    except (KeyError, ValueError, ConfigurationError) as e:
+        raise LLMError(f"Configuration error for LLM in initial analysis: {e}") from e
+    except Exception as e: # Catch any other unexpected errors
         logger.error(f"Error in initial_analysis_node: {e}", exc_info=True)
         raise LLMError(f"LLM failed during initial analysis: {e}")
 
+# Removed @retry_llm_call() decorator as per request
 def rag_retrieval_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing rag_retrieval_node for {state['object_type']}")
     logger.debug(f"rag_retrieval_node received config: {config}")
     try:
         llm = config['configurable']['llm']
-        # For simplicity without ChromaDB, RAG retrieval means ensuring
-        # sample_snowflake_code and guidelines are present in the state.
-        # RAG_QUERY_GENERATION_PROMPT is used here just to let LLM "think" about relevant terms,
-        # but it doesn't dynamically fetch from an external store.
+        # Generate a query for RAG based on the initial analysis.
+        # This query will be used by the HybridRetriever to find relevant documents.
         query_prompt = RAG_QUERY_GENERATION_PROMPT.invoke({
             "oracle_analysis": state['reflection'],
             "object_type": state['object_type']
         })
         llm_rag_thinking = llm.invoke(query_prompt).content
-        logger.info(f"LLM thinking for RAG (not fetching from DB): {llm_rag_thinking[:100]}...")
+        logger.info(f"LLM generated RAG query: {llm_rag_thinking[:100]}...")
 
-        if not state.get("sample_snowflake_code") and not state.get("snowflake_guidelines"):
-            logger.warning("No sample Snowflake code or guidelines provided. RAG context will be limited.")
-            state["errors"].append("Warning: No RAG context (sample code or guidelines) provided. LLM performance might be reduced.")
+        # Initialize HybridRetriever (will use configured ChromaDB and Embeddings)
+        retriever = HybridRetriever()
+        # Retrieve documents based on the LLM's query and object type
+        retrieved_documents = retriever.retrieve(llm_rag_thinking, state['object_type'])
 
-        state["current_step"] = f"RAG Context Prepared for {state['object_type']}."
-        logger.info("RAG Context (user-provided samples and guidelines) prepared.")
+        if not retrieved_documents and not state.get("snowflake_guidelines"):
+            logger.warning("No RAG documents retrieved and no general guidelines provided. LLM context will be limited.")
+            state["errors"].append("Warning: No relevant RAG context (sample code/guidelines) found. LLM performance might be reduced.")
+
+        state["sample_snowflake_code"] = retrieved_documents # Now a list of Document objects
+
+        state["current_step"] = f"RAG Retrieval for {state['object_type']} Complete."
+        logger.info(f"RAG Context Retrieved. {len(retrieved_documents)} documents from vector store.")
         return state
-    except KeyError as e:
-        logger.error(f"KeyError in rag_retrieval_node: Missing config key {e}", exc_info=True)
-        raise LLMError(f"LLM configuration missing: Key {e} not found in node config.")
+    except (KeyError, ValueError, ConfigurationError) as e:
+        raise LLMError(f"Configuration error for LLM/RAG retrieval: {e}") from e
     except Exception as e:
         logger.error(f"Error in rag_retrieval_node: {e}", exc_info=True)
         raise LLMError(f"Failed during RAG context preparation: {e}")
 
-# --- NEW NODE: View Decomposition ---
+# Removed @retry_llm_call() decorator as per request
 def view_decomposition_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing view_decomposition_node for {state['object_type']}")
     logger.debug(f"view_decomposition_node received config: {config}")
@@ -156,20 +159,21 @@ def view_decomposition_node(state: AgentState, config: RunnableConfig) -> AgentS
             prompt = VIEW_DECOMPOSITION_PROMPT_TEMPLATE.invoke({
                 "oracle_view_code": state['oracle_object_code'],
                 "snowflake_guidelines": state['snowflake_guidelines'],
-                "sample_snowflake_code": state['sample_snowflake_code'] # Direct string from state
+                "sample_snowflake_code": "\n\n".join([doc.page_content for doc in state['sample_snowflake_code']]) # Format for prompt
             })
             response = llm.invoke(prompt)
-            # The LLM should return a JSON string
-            decomposed_parts = json.loads(response.content)
+            decomposed_parts = json.loads(response.content) # The LLM should return a JSON string
             state["decomposed_oracle_view_parts"] = decomposed_parts
             state["is_decomposed"] = True
             state["translated_snowflake_view_parts"] = {} # Initialize for translation
             state["current_step"] = "View Decomposition Complete"
             logger.info("View decomposition successful.")
         except json.JSONDecodeError as e:
-            logger.error(f"LLM returned invalid JSON for decomposition: {response.content[:500]}... Error: {e}", exc_info=True)
+            logger.error(f"LLM returned invalid JSON for decomposition: {response.content[:500]}... Error: {e}", exc_info=True) # Log bad JSON
             state["errors"].append(f"View decomposition failed (invalid JSON from LLM): {e}. Proceeding without decomposition.")
             state["is_decomposed"] = False # Fallback to non-decomposed
+        except (KeyError, ValueError, ConfigurationError) as e:
+            raise LLMError(f"Configuration error for LLM in view decomposition: {e}") from e
         except Exception as e:
             logger.error(f"Error during view decomposition: {e}", exc_info=True)
             state["errors"].append(f"View decomposition failed: {e}. Proceeding without decomposition.")
@@ -180,11 +184,18 @@ def view_decomposition_node(state: AgentState, config: RunnableConfig) -> AgentS
 
     return state
 
+# Removed @retry_llm_call() decorator as per request
 def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing code_generation_node for {state['object_type']}")
     logger.debug(f"code_generation_node received config: {config}")
     try:
         llm = config['configurable']['llm']
+        # Format retrieved RAG documents (List[Document]) into a single string for the prompt
+        rag_context_str = "\n\n".join([
+            f"--- RAG Document (Source: {doc.metadata.get('source', 'Unknown')}, Type: {doc.metadata.get('type', 'General')}) ---\n"
+            f"{doc.page_content}"
+            for doc in state['sample_snowflake_code']
+        ])
 
         if state['is_decomposed'] and state['object_type'] == "View":
             logger.info("Translating decomposed view parts.")
@@ -203,7 +214,7 @@ def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentStat
                     "oracle_view_part_code": oracle_sql_part,
                     "full_oracle_view_code": state['oracle_object_code'], # Provide full view for context
                     "snowflake_guidelines": state['snowflake_guidelines'],
-                    "sample_snowflake_code": state['sample_snowflake_code'] # Direct string from state
+                    "sample_snowflake_code": rag_context_str # Pass formatted RAG
                 })
                 translated_part = llm.invoke(part_prompt).content
                 state['translated_snowflake_view_parts'][part_name] = translated_part
@@ -216,7 +227,7 @@ def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentStat
             prompt = CODE_GENERATION_PROMPT_TEMPLATE.invoke({
                 "oracle_object_code": state['oracle_object_code'],
                 "snowflake_guidelines": state['snowflake_guidelines'],
-                "sample_snowflake_code": state['sample_snowflake_code'], # Direct string from state
+                "sample_snowflake_code": rag_context_str, # Pass formatted RAG
                 "object_type": state['object_type']
             })
             response = llm.invoke(prompt)
@@ -224,14 +235,13 @@ def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentStat
             state["current_step"] = f"Code Generation for {state['object_type']} Complete"
             logger.info(f"Initial Snowflake {state['object_type']} code generated.")
         return state
-    except KeyError as e:
-        logger.error(f"KeyError in code_generation_node: Missing config key {e}", exc_info=True)
-        raise LLMError(f"LLM configuration missing: Key {e} not found in node config.")
-    except Exception as e:
+    except (KeyError, ValueError, ConfigurationError) as e:
+        raise LLMError(f"Configuration error for LLM in code generation: {e}") from e
+    except Exception as e: # Catch any other unexpected errors
         logger.error(f"Error in code_generation_node: {e}", exc_info=True)
         raise LLMError(f"LLM failed during code generation: {e}")
 
-# --- NEW NODE: View Assembly ---
+# Removed @retry_llm_call() decorator as per request
 def view_assembly_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing view_assembly_node for {state['object_type']}")
     logger.debug(f"view_assembly_node received config: {config}")
@@ -249,6 +259,8 @@ def view_assembly_node(state: AgentState, config: RunnableConfig) -> AgentState:
             state["generated_snowflake_code"] = assembled_code
             state["current_step"] = "View Assembly Complete"
             logger.info("View assembly successful.")
+        except (KeyError, ValueError, ConfigurationError) as e:
+            raise LLMError(f"Configuration error for LLM in view assembly: {e}") from e
         except Exception as e:
             logger.error(f"Error during view assembly: {e}", exc_info=True)
             state["errors"].append(f"View assembly failed: {e}. Generated code might be incomplete.")
@@ -258,6 +270,7 @@ def view_assembly_node(state: AgentState, config: RunnableConfig) -> AgentState:
 
     return state
 
+# Removed @retry_llm_call() decorator as per request
 def optimization_and_reflection_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing optimization_and_reflection_node for {state['object_type']}")
     logger.debug(f"optimization_and_reflection_node received config: {config}")
@@ -268,11 +281,16 @@ def optimization_and_reflection_node(state: AgentState, config: RunnableConfig) 
 
     try:
         llm = config['configurable']['llm']
-        reflection_prompt = OPTIMIZATION_REFLECTION_PROMPT_TEMPLATE.invoke({
+        rag_context_str = "\n\n".join([
+            f"--- RAG Document (Source: {doc.metadata.get('source', 'Unknown')}, Type: {doc.metadata.get('type', 'General')}) ---\n"
+            f"{doc.page_content}"
+            for doc in state['sample_snowflake_code']
+        ])
+        reflection_prompt = OPTIMIZATION_REFLECTION_PROMPT_TEMPLATE.invoke({ # This prompt uses the raw strings now
             "original_oracle_object_code": state['oracle_object_code'],
             "generated_snowflake_code": state['generated_snowflake_code'],
             "snowflake_guidelines": state['snowflake_guidelines'],
-            "sample_snowflake_code": state['sample_snowflake_code'], # Direct string from state
+            "sample_snowflake_code": rag_context_str,
             "object_type": state['object_type']
         })
         response = llm.invoke(reflection_prompt)
@@ -289,10 +307,9 @@ def optimization_and_reflection_node(state: AgentState, config: RunnableConfig) 
             logger.warning(f"LLM identified areas for further optimization after {state['optimization_cycle_count']} cycles.")
 
         return state
-    except KeyError as e:
-        logger.error(f"KeyError in optimization_and_reflection_node: Missing config key {e}", exc_info=True)
-        raise LLMError(f"LLM configuration missing: Key {e} not found in node config.")
-    except Exception as e:
+    except (KeyError, ValueError, ConfigurationError) as e:
+        raise LLMError(f"Configuration error for LLM in optimization/reflection: {e}") from e
+    except Exception as e: # Catch any other unexpected errors
         logger.error(f"Error in optimization_and_reflection_node: {e}", exc_info=True)
         raise LLMError(f"LLM failed during optimization and reflection: {e}")
 
@@ -412,4 +429,3 @@ def compile_migration_graph(llm_instance, object_type: str):
     compiled_graph = graph_builder.compile()
     logger.info(f"LangGraph migration workflow compiled successfully for {object_type}.")
     return compiled_graph
-
