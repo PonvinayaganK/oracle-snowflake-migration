@@ -1,0 +1,6 @@
+mkdir oracle_snowflake_migration
+cd oracle_snowflake_migration
+mkdir src data logs
+touch src/__init__.py data/guidelines.txt data/sample_snowflake_procedures.txt .env.example
+mkdir src/ui src/core src/data_processing src/llm_config src/utils data/oracle_procedures
+touch src/ui/__init__.py src/core/__init__.py src/data_processing/__init__.py src/llm_config/__init__.py src/utils/__init__.py

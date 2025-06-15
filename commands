@@ -1,0 +1,22 @@
+python -m streamlit run src/ui/app.py
+
+uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
+python src/scripts/ingest_rag_data.py
+
+Env Entries
+===========
+OPENAI_API_KEY="your_openai_key_if_using_openai_llm_or_embeddings"
+ANTHROPIC_API_KEY="your_anthropic_key_if_using_anthropic_llm"
+OLLAMA_BASE_URL="http://localhost:11434" # Or your Ollama server URL
+
+EMBEDDING_MODEL_NAME="all-MiniLM-L6-v2" # Or "text-embedding-ada-002" if you have OpenAI API key
+CHROMA_DB_PATH="data/vector_store"
+CHROMA_COLLECTION_NAME="snowflake_migration_examples"
+RAG_TOP_K_SEMANTIC=5
+RAG_TOP_K_KEYWORD=5
+
+API_HOST="0.0.0.0"
+API_PORT=8000
+
+LOG_LEVEL="INFO"

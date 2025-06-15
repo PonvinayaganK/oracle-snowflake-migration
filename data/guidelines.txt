@@ -1,0 +1,84 @@
+# data/guidelines.txt
+## Oracle to Snowflake Migration Guidelines
+
+### General Guidelines:
+1.  **Prefer Snowflake Scripting:** For procedural logic, prioritize Snowflake Scripting (SQL Scripting) over JavaScript UDFs/Stored Procedures unless specific JavaScript features are required.
+2.  **Case Sensitivity:** Snowflake identifiers are case-insensitive by default, but maintain consistent casing as per your Snowflake environment's best practices. Use double quotes for case-sensitive identifiers.
+3.  **Error Handling:** Convert Oracle's `EXCEPTION WHEN OTHERS THEN` blocks to Snowflake's `EXCEPTION WHEN OTHER THEN` using `SQLCODE` and `SQLERRM` for error details. Log errors thoroughly.
+4.  **Security:** Implement `GRANT` statements for appropriate roles.
+
+### Oracle-Specific Feature Mappings:
+
+#### 1. Data Types:
+* `VARCHAR2` -> `VARCHAR`
+* `NUMBER` -> `NUMBER`, `INTEGER`, `DECIMAL` (choose based on precision/scale)
+* `DATE`, `TIMESTAMP` -> `TIMESTAMP_LTZ`, `TIMESTAMP_NTZ`, `DATE` (choose based on time zone requirements)
+* `CLOB`, `BLOB` -> `VARCHAR`, `VARBINARY` (consider size limits, `VARIANT` for structured JSON/XML)
+* `BOOLEAN` -> `BOOLEAN` (if used in procedural logic)
+
+#### 2. Control Flow:
+* **IF/THEN/ELSE:** Directly maps to `IF (condition) THEN ... ELSEIF ... ELSE ... END IF;`
+* **LOOP:** Use `WHILE` loops. Avoid `LOOP...END LOOP` and `FOR` loops for explicit cursors if possible, prefer set-based operations.
+* **GOTO:** Avoid. Refactor logic to remove `GOTO`.
+* **CASE Statements:** Maps directly.
+
+#### 3. Cursors:
+* **Explicit Cursors:** Replace with `FOR result_row IN (SELECT ...) DO ... END FOR;` for implicit cursors (if possible) or `CURSOR FOR` loops in Snowflake Scripting.
+* **Bulk Collect:** Re-evaluate necessity. Snowflake is columnar and prefers set-based operations. Convert to `ARRAY_AGG` or `COLLECT_LIST` for array construction if needed.
+* **Cursor Attributes (`%NOTFOUND`, `%FOUND`, `%ROWCOUNT`):** Adapt using `SQLCODE` and checking `ROW_COUNT()`.
+
+#### 4. Functions & Operators:
+* `NVL(expr1, expr2)` -> `COALESCE(expr1, expr2)`
+* `DECODE(col, val1, res1, ...)` -> `CASE WHEN col = val1 THEN res1 ... END`
+* `SYSDATE` -> `CURRENT_TIMESTAMP()`, `CURRENT_DATE()`
+* `DUAL` table -> Not needed in Snowflake; queries can run without `FROM` clause for single row results (e.g., `SELECT 1;`).
+* `SUBSTR`, `INSTR` -> Directly maps.
+* `TO_CHAR`, `TO_DATE`, `TO_NUMBER` -> Use Snowflake's `TO_VARCHAR`, `TO_DATE`, `TO_NUMBER` with appropriate format strings.
+* `ROWNUM` -> Use `ROW_NUMBER()` window function with `QUALIFY` clause.
+* `LISTAGG` -> Use `LISTAGG` (similar syntax) or `ARRAY_AGG` for array output if preferred.
+
+#### 5. DML Operations:
+* `INSERT`, `UPDATE`, `DELETE`, `MERGE` -> Generally similar syntax.
+* **`MERGE`:** Ensure Snowflake's `MATCHED`/`NOT MATCHED` clauses are correctly applied.
+* **`DELETE` with `USING`:** Translate to Snowflake's `DELETE FROM ... USING ... WHERE ...`.
+
+#### 6. Dynamic SQL (`EXECUTE IMMEDIATE`):
+* Translate carefully. For simple cases, `EXECUTE IMMEDIATE` in Snowflake Scripting can be used. For complex scenarios, consider restructuring the logic or using Snowflake's `CALL` or `EXECUTE AS` for UDFs/Procedures.
+
+#### 7. Packages & Triggers:
+* **Packages:** Break down into individual Snowflake procedures and functions.
+* **Triggers:** Replace with Streams and Tasks or external ETL processes. Do not directly translate.
+
+### Optimization & Best Practices for Snowflake:
+* **Set-Based Operations:** Always favor set-based operations over row-by-row processing (cursors/loops) where possible.
+* **Clustering Keys:** Mention potential `CLUSTER BY` considerations if tables are heavily filtered by certain columns.
+* **Variant Data Type:** Use `VARIANT` for semi-structured data (JSON, XML) efficiently.
+* **Window Functions:** Leverage Snowflake's powerful window functions (`QUALIFY`) for complex analytical queries.
+* **Transactions:** Use `BEGIN TRANSACTION`, `COMMIT`, `ROLLBACK` explicitly.
+* **Temporary Tables:** Use `CREATE TEMPORARY TABLE` or CTEs for intermediate results.
+
+### Oracle View to Snowflake View Migration Guidelines:
+
+#### General View Considerations:
+1.  **SQL Dialect:** Focus heavily on translating Oracle SQL dialect to Snowflake SQL.
+2.  **Materialized Views:** Oracle Materialized Views (MV) might translate to Snowflake Materialized Views or regular views with Streams and Tasks for incremental updates, depending on complexity. Prioritize regular views unless MVs are explicitly requested and justified.
+3.  **WITH READ ONLY:** This Oracle view option is not directly translated; Snowflake views are read-only by nature.
+4.  **Complex Subqueries/Analytic Functions:** Ensure these are correctly translated, paying attention to `QUALIFY` for `ROWNUM`/`ROW_NUMBER()` equivalents.
+
+#### Specific SQL Translation for Views:
+* **Joins:** Oracle's `(+)` for outer joins must be converted to ANSI SQL `LEFT OUTER JOIN`, `RIGHT OUTER JOIN`, `FULL OUTER JOIN`.
+    * `SELECT A.col, B.col FROM A, B WHERE A.id = B.id(+);` -> `SELECT A.col, B.col FROM A LEFT OUTER JOIN B ON A.id = B.id;`
+* **Functions:**
+    * `DECODE(col, val1, res1, val2, res2, default)` -> `CASE WHEN col = val1 THEN res1 WHEN col = val2 THEN res2 ELSE default END`
+    * `NVL`, `NVL2` -> `COALESCE`
+    * `DUAL` -> Remove the `FROM DUAL` clause; Snowflake queries can be executed without a `FROM` clause if not querying a table.
+    * `TO_DATE`, `TO_CHAR`, `TO_NUMBER` -> Use Snowflake's `TO_DATE`, `TO_VARCHAR`, `TO_NUMBER` with appropriate format specifiers.
+    * `SUBSTR`, `INSTR`, `LENGTH` -> Direct equivalents `SUBSTR`, `INSTR`, `LENGTH`.
+    * `SYSDATE` -> `CURRENT_TIMESTAMP()`, `CURRENT_DATE()`
+* **Pseudocolumns:**
+    * `ROWNUM` -> Translate to `ROW_NUMBER() OVER (ORDER BY <columns>)` with a `QUALIFY` clause for filtering.
+    * `ROWID` -> No direct equivalent. If used, review logic for an alternative unique identifier or design change.
+* **Hierarchical Queries (CONNECT BY):** Translate to Recursive CTEs (`WITH RECURSIVE`). This is a complex transformation.
+* **Analytic Functions:** Oracle's analytic functions largely have direct counterparts in Snowflake. Verify syntax for `OVER (...)` clauses.
+* **PIVOT/UNPIVOT:** Oracle's `PIVOT`/`UNPIVOT` can be translated to Snowflake's `PIVOT`/`UNPIVOT` operators, or often more readably with `CASE` statements and `GROUP BY` for pivoting, or `UNION ALL` for unpivoting.
+

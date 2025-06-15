@@ -1,0 +1,82 @@
+-- data/oracle_procedures/example_proc.sql
+-- Example Oracle Procedure
+-- This procedure demonstrates complex cursor usage, exception handling, and Oracle-specific features.
+
+CREATE OR REPLACE PROCEDURE MANAGE_PRODUCT_INVENTORY (
+    p_product_id IN NUMBER,
+    p_quantity_change IN NUMBER, -- Positive for increase, negative for decrease
+    p_operation_type IN VARCHAR2, -- 'ADD' or 'REMOVE'
+    p_status_message OUT VARCHAR2
+)
+IS
+    v_current_stock NUMBER;
+    v_product_name VARCHAR2(100);
+    v_unit_price NUMBER(10, 2);
+    v_record_count NUMBER := 0;
+
+    CURSOR c_product_details IS
+        SELECT product_name, stock_quantity, unit_price
+        FROM products
+        WHERE product_id = p_product_id
+        FOR UPDATE OF stock_quantity; -- Locks the row
+
+    product_not_found EXCEPTION;
+    insufficient_stock EXCEPTION;
+    invalid_operation EXCEPTION;
+
+BEGIN
+    OPEN c_product_details;
+    FETCH c_product_details INTO v_product_name, v_current_stock, v_unit_price;
+
+    IF c_product_details%NOTFOUND THEN
+        RAISE product_not_found;
+    END IF;
+
+    v_record_count := c_product_details%ROWCOUNT; -- Will be 1 if found
+
+    IF p_operation_type = 'ADD' THEN
+        UPDATE products
+        SET stock_quantity = v_current_stock + p_quantity_change,
+            last_updated_date = SYSDATE
+        WHERE CURRENT OF c_product_details;
+        p_status_message := 'Inventory added for ' || v_product_name || '. New stock: ' || (v_current_stock + p_quantity_change);
+    ELSIF p_operation_type = 'REMOVE' THEN
+        IF v_current_stock < p_quantity_change THEN
+            RAISE insufficient_stock;
+        END IF;
+        UPDATE products
+        SET stock_quantity = v_current_stock - p_quantity_change,
+            last_updated_date = SYSDATE
+        WHERE CURRENT OF c_product_details;
+        p_status_message := 'Inventory removed for ' || v_product_name || '. New stock: ' || (v_current_stock - p_quantity_change);
+    ELSE
+        RAISE invalid_operation;
+    END IF;
+
+    CLOSE c_product_details;
+    COMMIT; -- Commit changes
+
+EXCEPTION
+    WHEN product_not_found THEN
+        CLOSE c_product_details;
+        ROLLBACK;
+        p_status_message := 'Error: Product ID ' || p_product_id || ' not found.';
+        DBMS_OUTPUT.PUT_LINE(p_status_message);
+    WHEN insufficient_stock THEN
+        CLOSE c_product_details;
+        ROLLBACK;
+        p_status_message := 'Error: Insufficient stock for product ' || v_product_name || '. Current: ' || v_current_stock || ', Requested: ' || p_quantity_change;
+        DBMS_OUTPUT.PUT_LINE(p_status_message);
+    WHEN invalid_operation THEN
+        CLOSE c_product_details;
+        ROLLBACK;
+        p_status_message := 'Error: Invalid operation type "' || p_operation_type || '". Must be ADD or REMOVE.';
+        DBMS_OUTPUT.PUT_LINE(p_status_message);
+    WHEN OTHERS THEN
+        CLOSE c_product_details;
+        ROLLBACK;
+        p_status_message := 'An unexpected error occurred: ' || SQLERRM;
+        DBMS_OUTPUT.PUT_LINE(p_status_message);
+        RAISE; -- Re-raise the exception
+END;
+/

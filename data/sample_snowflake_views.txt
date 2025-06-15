@@ -1,0 +1,68 @@
+# data/sample_snowflake_views.txt
+-- Example 1: Basic Snowflake View
+-- Demonstrates simple column selection and aliasing.
+
+CREATE OR REPLACE VIEW MY_SCHEMA.ACTIVE_EMPLOYEES_VW AS
+SELECT
+    EMPLOYEE_ID,
+    FIRST_NAME || ' ' || LAST_NAME AS FULL_NAME,
+    EMAIL,
+    PHONE_NUMBER,
+    HIRE_DATE
+FROM EMPLOYEES
+WHERE STATUS = 'ACTIVE';
+
+-- Example 2: Snowflake View with Joins and Aggregation
+-- Shows how to join tables and perform aggregations in a view.
+
+CREATE OR REPLACE VIEW MY_SCHEMA.DEPARTMENT_SALARY_SUMMARY_VW AS
+SELECT
+    D.DEPARTMENT_NAME,
+    COUNT(E.EMPLOYEE_ID) AS NUMBER_OF_EMPLOYEES,
+    SUM(E.SALARY) AS TOTAL_DEPARTMENT_SALARY,
+    AVG(E.SALARY) AS AVERAGE_DEPARTMENT_SALARY
+FROM EMPLOYEES E
+JOIN DEPARTMENTS D ON E.DEPARTMENT_ID = D.DEPARTMENT_ID
+GROUP BY D.DEPARTMENT_NAME
+ORDER BY D.DEPARTMENT_NAME;
+
+-- Example 3: Snowflake View with QUALIFY (for ROW_NUMBER equivalent)
+-- Demonstrates how to get the latest record for each group using QUALIFY.
+
+CREATE OR REPLACE VIEW MY_SCHEMA.LATEST_ORDER_PER_CUSTOMER_VW AS
+SELECT
+    CUSTOMER_ID,
+    ORDER_ID,
+    ORDER_DATE,
+    TOTAL_AMOUNT
+FROM ORDERS
+QUALIFY ROW_NUMBER() OVER (PARTITION BY CUSTOMER_ID ORDER BY ORDER_DATE DESC) = 1;
+
+-- Example 4: View using common table expressions (CTEs)
+-- Illustrates how to structure complex view logic with CTEs.
+
+CREATE OR REPLACE VIEW MY_SCHEMA.HIGH_VALUE_PRODUCTS_LAST_MONTH_VW AS
+WITH MonthlySales AS (
+    SELECT
+        PRODUCT_ID,
+        SUM(QUANTITY * UNIT_PRICE) AS MonthlyRevenue
+    FROM SALES_TRANSACTIONS
+    WHERE TRANSACTION_DATE >= DATEADD(month, -1, CURRENT_DATE())
+    GROUP BY PRODUCT_ID
+),
+ProductDetails AS (
+    SELECT
+        P.PRODUCT_ID,
+        P.PRODUCT_NAME,
+        P.CATEGORY
+    FROM PRODUCTS P
+)
+SELECT
+    PD.PRODUCT_ID,
+    PD.PRODUCT_NAME,
+    PD.CATEGORY,
+    MS.MonthlyRevenue
+FROM MonthlySales MS
+JOIN ProductDetails PD ON MS.PRODUCT_ID = PD.PRODUCT_ID
+WHERE MS.MonthlyRevenue > 10000 -- Example threshold
+ORDER BY MS.MonthlyRevenue DESC;

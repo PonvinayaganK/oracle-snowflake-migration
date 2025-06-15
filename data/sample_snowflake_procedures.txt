@@ -1,0 +1,111 @@
+# data/sample_snowflake_procedures.txt
+-- Example 1: Basic Snowflake Scripting Procedure
+-- This procedure demonstrates conditional logic, simple DML, and error handling.
+
+CREATE OR REPLACE PROCEDURE MY_SCHEMA.PROCESS_ORDERS(order_id_param NUMBER, status_param VARCHAR)
+RETURNS VARCHAR
+LANGUAGE SQL
+AS
+$$
+DECLARE
+    order_exists BOOLEAN DEFAULT FALSE;
+    row_count NUMBER;
+    error_message VARCHAR;
+    error_code VARCHAR;
+BEGIN
+    -- Check if order exists
+    SELECT TRUE INTO order_exists FROM ORDERS WHERE ORDER_ID = :order_id_param LIMIT 1;
+
+    IF (order_exists) THEN
+        UPDATE ORDERS SET STATUS = :status_param, LAST_UPDATED_AT = CURRENT_TIMESTAMP() WHERE ORDER_ID = :order_id_param;
+        row_count := ROW_COUNT();
+        IF (row_count > 0) THEN
+            RETURN 'Order ' || :order_id_param || ' updated successfully.';
+        ELSE
+            RETURN 'Order ' || :order_id_param || ' found but not updated (no changes).';
+        END IF;
+    ELSE
+        INSERT INTO ORDER_LOG (ORDER_ID, LOG_MESSAGE, LOG_TIMESTAMP)
+        VALUES (:order_id_param, 'Attempted to process non-existent order.', CURRENT_TIMESTAMP());
+        RETURN 'Order ' || :order_id_param || ' does not exist.';
+    END IF;
+
+EXCEPTION
+    WHEN OTHER THEN
+        error_message := SQLERRM;
+        error_code := SQLCODE;
+        INSERT INTO ERROR_LOG (LOG_TIMESTAMP, ERROR_CODE, ERROR_MESSAGE, PROCEDURE_NAME)
+        VALUES (CURRENT_TIMESTAMP(), :error_code, :error_message, 'PROCESS_ORDERS');
+        RETURN 'Error processing order: ' || :error_message;
+END;
+$$;
+
+-- Example 2: Procedure with Cursor-like behavior using FOR loop (optimized for set-based)
+-- This procedure demonstrates iterating through results and performing DML,
+-- but implicitly leverages Snowflake's columnar processing.
+
+CREATE OR REPLACE PROCEDURE MY_SCHEMA.UPDATE_HIGH_VALUE_CUSTOMERS(threshold NUMBER)
+RETURNS VARCHAR
+LANGUAGE SQL
+AS
+$$
+DECLARE
+    customer_name VARCHAR;
+    customer_id NUMBER;
+    updated_count NUMBER := 0;
+    status_message VARCHAR;
+BEGIN
+    -- Iterate over customers with total order value > threshold
+    -- This is a FOR loop over a SELECT statement, which is highly optimized in Snowflake Scripting
+    FOR customer_row IN (SELECT C.CUSTOMER_ID, C.CUSTOMER_NAME, SUM(O.TOTAL_AMOUNT) AS TOTAL_ORDER_VALUE
+                         FROM CUSTOMERS C
+                         JOIN ORDERS O ON C.CUSTOMER_ID = O.CUSTOMER_ID
+                         GROUP BY C.CUSTOMER_ID, C.CUSTOMER_NAME
+                         HAVING TOTAL_ORDER_VALUE > :threshold)
+    DO
+        customer_id := customer_row.CUSTOMER_ID;
+        customer_name := customer_row.CUSTOMER_NAME;
+
+        -- Perform an update for each high-value customer
+        UPDATE CUSTOMERS
+        SET STATUS = 'PREMIUM'
+        WHERE CUSTOMER_ID = :customer_id;
+
+        updated_count := updated_count + 1;
+        INSERT INTO AUDIT_LOG (LOG_TIMESTAMP, MESSAGE)
+        VALUES (CURRENT_TIMESTAMP(), 'Updated customer ' || :customer_name || ' to PREMIUM.');
+    END FOR;
+
+    status_message := 'Successfully updated ' || updated_count || ' high-value customers.';
+    RETURN status_message;
+
+EXCEPTION
+    WHEN OTHER THEN
+        RETURN 'Error: ' || SQLERRM;
+END;
+$$;
+
+-- Example 3: JavaScript UDF for complex string manipulation (if needed for specific Oracle functions)
+-- This is an example of when JavaScript might be preferred, e.g., for regex or custom logic not easily done in SQL.
+
+CREATE OR REPLACE FUNCTION MY_SCHEMA.EXTRACT_DATA_FROM_JSON(json_string VARCHAR, key_path VARCHAR)
+RETURNS VARCHAR
+LANGUAGE JAVASCRIPT
+AS
+$$
+    try {
+        var data = JSON.parse(JSON_STRING);
+        var keys = KEY_PATH.split('.');
+        var result = data;
+        for (var i = 0; i < keys.length; i++) {
+            if (result && typeof result === 'object' && keys[i] in result) {
+                result = result[keys[i]];
+            } else {
+                return null; // Key not found
+            }
+        }
+        return JSON.stringify(result);
+    } catch (e) {
+        return 'Error parsing JSON: ' + e.message;
+    }
+$$;

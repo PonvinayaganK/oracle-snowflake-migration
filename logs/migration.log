@@ -1,0 +1,1527 @@
+2025-06-09 22:54:19,095 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 22:54:19,102 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 22:54:19,103 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 22:54:19,104 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: gpt-4o
+2025-06-09 22:54:19,105 - src.llm_config.llm_manager - INFO - Initialized OpenAI LLM: gpt-4o
+2025-06-09 22:54:19,105 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 22:54:19,110 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 22:54:19,112 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 22:54:19,113 - src.core.agent_workflow - DEBUG - initial_analysis_node received config:
+{'configurable': {'llm': ChatOpenAI(client=<openai.resources.chat.completions.completions.Completions object at 0x117315430>,
+async_client=<openai.resources.chat.completions.completions.AsyncCompletions object at 0x11739bf50>,
+root_client=<openai.OpenAI object at 0x1164eacc0>, root_async_client=<openai.AsyncOpenAI object at 0x105e65640>,
+model_name='gpt-4o',
+temperature=0.1,
+model_kwargs={},
+openai_api_key=SecretStr('**********')), '__pregel_task_id': '6427e0f2-bd73-0d24-4ad4-fd00748d3cda', '__pregel_send': <built-in method extend of collections.deque object at 0x12031f2e0>, '__pregel_read': functools.partial(<function local_read at 0x115c0b2e0>, {'oracle_procedure_code': <langgraph.channels.last_value.LastValue object at 0x120524440>, 'snowflake_guidelines': <langgraph.channels.last_value.LastValue object at 0x120520880>, 'sample_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x120526e40>, 'generated_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x120526e00>, 'reflection': <langgraph.channels.last_value.LastValue object at 0x120525780>, 'errors': <langgraph.channels.last_value.LastValue object at 0x120526f00>, 'current_step': <langgraph.channels.last_value.LastValue object at 0x120526640>, '__start__': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x120527000>, 'branch:to:initial_analysis': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x120527580>, 'branch:to:rag_retrieval': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x1205273c0>, 'branch:to:code_generation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x120524fc0>, 'branch:to:optimization_and_reflection': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x120527680>, 'branch:to:validation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x120527100>}, {}, PregelTaskWrites(path=('__pregel_pull', 'initial_analysis'), name='initial_analysis', writes=deque([]), triggers=('branch:to:initial_analysis',))), '__pregel_store': None, '__pregel_checkpointer': None, 'checkpoint_map': {'': '1f045a63-432e-62e2-8000-7a64f4cec1b5'}, 'checkpoint_id': None, 'checkpoint_ns': 'initial_analysis:6427e0f2-bd73-0d24-4ad4-fd00748d3cda', '__pregel_scratchpad': PregelScratchpad(call_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x1204564d0>, interrupt_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x106dccee0>, get_null_resume=<function _scratchpad.<locals>.get_null_resume at 0x1205058a0>, resume=[], subgraph_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x106dccc70>), '__pregel_previous': None, '__pregel_call': functools.partial(<function _call at 0x115c4a480>, <weakref at 0x1205e4b30; to 'PregelExecutableTask' at 0x120506030>, retry=None, futures=<weakref at 0x1205e4c70; to 'FuturesDict' at 0x1205e4870>, schedule_task=<bound method SyncPregelLoop.accept_push of <langgraph.pregel.loop.SyncPregelLoop object at 0x1204ef800>>, submit=<weakref at 0x120566850; to 'BackgroundExecutor' at 0x120426450>)}, 'metadata': {'langgraph_step': 1, 'langgraph_node': 'initial_analysis', 'langgraph_triggers': ('branch:to:initial_analysis',), 'langgraph_path': ('__pregel_pull', 'initial_analysis'), 'langgraph_checkpoint_ns': 'initial_analysis:6427e0f2-bd73-0d24-4ad4-fd00748d3cda'}, 'callbacks': <langchain_core.callbacks.manager.CallbackManager object at 0x106dcce30>}
+2025-06-09 22:54:19,114 - src.core.agent_workflow - ERROR - KeyError in initial_analysis_node: Missing config key 'llm'
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+2025-06-09 22:54:19,114 - __main__ - ERROR - Error during migration for manual_input.sql: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 190, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 100, in initial_analysis_node
+    raise LLMError(f"LLM configuration missing: Key {e} not found in node config. Ensure LLM is passed correctly to graph.stream().")
+src.utils.exceptions.LLMError: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+During task with name 'initial_analysis' and id '6427e0f2-bd73-0d24-4ad4-fd00748d3cda'
+2025-06-09 22:54:34,562 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 22:54:35,106 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 22:54:35,107 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 22:54:42,203 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 22:54:42,211 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 22:54:42,212 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 22:54:42,212 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: gpt-4o
+2025-06-09 22:54:42,335 - src.llm_config.llm_manager - INFO - Initialized OpenAI LLM: gpt-4o
+2025-06-09 22:54:42,335 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 22:54:42,339 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 22:54:42,340 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 22:54:42,340 - src.core.agent_workflow - DEBUG - initial_analysis_node received config: {'configurable': {'llm': ChatOpenAI(client=<openai.resources.chat.completions.completions.Completions object at 0x13020c2f0>, async_client=<openai.resources.chat.completions.completions.AsyncCompletions object at 0x1312e6630>, root_client=<openai.OpenAI object at 0x127374f80>, root_async_client=<openai.AsyncOpenAI object at 0x13020d9d0>, model_name='gpt-4o', temperature=0.1, model_kwargs={}, openai_api_key=SecretStr('**********')), '__pregel_task_id': '0fb9ed8e-bc71-890b-b702-09b07841d1fc', '__pregel_send': <built-in method extend of collections.deque object at 0x1312f4f40>, '__pregel_read': functools.partial(<function local_read at 0x1268468e0>, {'oracle_procedure_code': <langgraph.channels.last_value.LastValue object at 0x13132cc40>, 'snowflake_guidelines': <langgraph.channels.last_value.LastValue object at 0x13132fa40>, 'sample_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x13132fb00>, 'generated_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x13132fac0>, 'reflection': <langgraph.channels.last_value.LastValue object at 0x13132fa00>, 'errors': <langgraph.channels.last_value.LastValue object at 0x13132f9c0>, 'current_step': <langgraph.channels.last_value.LastValue object at 0x13132f3c0>, '__start__': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132c380>, 'branch:to:initial_analysis': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132c480>, 'branch:to:rag_retrieval': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132e040>, 'branch:to:code_generation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132c400>, 'branch:to:optimization_and_reflection': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132c500>, 'branch:to:validation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x13132e140>}, {}, PregelTaskWrites(path=('__pregel_pull', 'initial_analysis'), name='initial_analysis', writes=deque([]), triggers=('branch:to:initial_analysis',))), '__pregel_store': None, '__pregel_checkpointer': None, 'checkpoint_map': {'': '1f045a64-20b3-6748-8000-fc1413ed83f4'}, 'checkpoint_id': None, 'checkpoint_ns': 'initial_analysis:0fb9ed8e-bc71-890b-b702-09b07841d1fc', '__pregel_scratchpad': PregelScratchpad(call_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x1312e7e20>, interrupt_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x1312e7e50>, get_null_resume=<function _scratchpad.<locals>.get_null_resume at 0x13130a2a0>, resume=[], subgraph_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x1312e7e80>), '__pregel_previous': None, '__pregel_call': functools.partial(<function _call at 0x126881a80>, <weakref at 0x131329670; to 'PregelExecutableTask' at 0x13130a350>, retry=None, futures=<weakref at 0x131329710; to 'FuturesDict' at 0x131328960>, schedule_task=<bound method SyncPregelLoop.accept_push of <langgraph.pregel.loop.SyncPregelLoop object at 0x1312e7c20>>, submit=<weakref at 0x13131d850; to 'BackgroundExecutor' at 0x131244f80>)}, 'metadata': {'langgraph_step': 1, 'langgraph_node': 'initial_analysis', 'langgraph_triggers': ('branch:to:initial_analysis',), 'langgraph_path': ('__pregel_pull', 'initial_analysis'), 'langgraph_checkpoint_ns': 'initial_analysis:0fb9ed8e-bc71-890b-b702-09b07841d1fc'}, 'callbacks': <langchain_core.callbacks.manager.CallbackManager object at 0x1312e7ec0>}
+2025-06-09 22:54:42,341 - src.core.agent_workflow - ERROR - KeyError in initial_analysis_node: Missing config key 'llm'
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+2025-06-09 22:54:42,341 - __main__ - ERROR - Error during migration for manual_input.sql: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 190, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 100, in initial_analysis_node
+    raise LLMError(f"LLM configuration missing: Key {e} not found in node config. Ensure LLM is passed correctly to graph.stream().")
+src.utils.exceptions.LLMError: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+During task with name 'initial_analysis' and id '0fb9ed8e-bc71-890b-b702-09b07841d1fc'
+2025-06-09 22:59:48,855 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 22:59:49,406 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 22:59:49,407 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 22:59:53,273 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 22:59:53,280 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 22:59:53,281 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 22:59:53,282 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: gpt-4o
+2025-06-09 22:59:53,400 - src.llm_config.llm_manager - INFO - Initialized OpenAI LLM: gpt-4o
+2025-06-09 22:59:53,400 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 22:59:53,403 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 22:59:53,405 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 22:59:53,405 - src.core.agent_workflow - DEBUG - initial_analysis_node received config: {'configurable': {'llm': ChatOpenAI(client=<openai.resources.chat.completions.completions.Completions object at 0x11825eba0>, async_client=<openai.resources.chat.completions.completions.AsyncCompletions object at 0x118ae7020>, root_client=<openai.OpenAI object at 0x1180c4f80>, root_async_client=<openai.AsyncOpenAI object at 0x1183d2060>, model_name='gpt-4o', temperature=0.1, model_kwargs={}, openai_api_key=SecretStr('**********')), '__pregel_task_id': 'e324e808-1ab3-6a0f-4d39-7ae9b6d635c7', '__pregel_send': <built-in method extend of collections.deque object at 0x118a85e40>, '__pregel_read': functools.partial(<function local_read at 0x10ebd3920>, {'oracle_procedure_code': <langgraph.channels.last_value.LastValue object at 0x118b274c0>, 'snowflake_guidelines': <langgraph.channels.last_value.LastValue object at 0x118b26f80>, 'sample_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x118b34e00>, 'generated_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x118b34c40>, 'reflection': <langgraph.channels.last_value.LastValue object at 0x118b34f00>, 'errors': <langgraph.channels.last_value.LastValue object at 0x118b34d80>, 'current_step': <langgraph.channels.last_value.LastValue object at 0x118b34c80>, '__start__': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34c00>, 'branch:to:initial_analysis': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34d40>, 'branch:to:rag_retrieval': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34cc0>, 'branch:to:code_generation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34b80>, 'branch:to:optimization_and_reflection': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34ac0>, 'branch:to:validation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x118b34b00>}, {}, PregelTaskWrites(path=('__pregel_pull', 'initial_analysis'), name='initial_analysis', writes=deque([]), triggers=('branch:to:initial_analysis',))), '__pregel_store': None, '__pregel_checkpointer': None, 'checkpoint_map': {'': '1f045a6f-b73e-6f68-8000-8f79092b20bd'}, 'checkpoint_id': None, 'checkpoint_ns': 'initial_analysis:e324e808-1ab3-6a0f-4d39-7ae9b6d635c7', '__pregel_scratchpad': PregelScratchpad(call_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x118b381f0>, interrupt_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x118b380a0>, get_null_resume=<function _scratchpad.<locals>.get_null_resume at 0x118b167a0>, resume=[], subgraph_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x118b38070>), '__pregel_previous': None, '__pregel_call': functools.partial(<function _call at 0x10ec0eac0>, <weakref at 0x118b32020; to 'PregelExecutableTask' at 0x118b16850>, retry=None, futures=<weakref at 0x118b320c0; to 'FuturesDict' at 0x118b31310>, schedule_task=<bound method SyncPregelLoop.accept_push of <langgraph.pregel.loop.SyncPregelLoop object at 0x118b384d0>>, submit=<weakref at 0x118b1ddd0; to 'BackgroundExecutor' at 0x11839eb40>)}, 'metadata': {'langgraph_step': 1, 'langgraph_node': 'initial_analysis', 'langgraph_triggers': ('branch:to:initial_analysis',), 'langgraph_path': ('__pregel_pull', 'initial_analysis'), 'langgraph_checkpoint_ns': 'initial_analysis:e324e808-1ab3-6a0f-4d39-7ae9b6d635c7'}, 'callbacks': <langchain_core.callbacks.manager.CallbackManager object at 0x118b38620>}
+2025-06-09 22:59:53,406 - src.core.agent_workflow - ERROR - KeyError in initial_analysis_node: Missing config key 'llm'
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+2025-06-09 22:59:53,406 - __main__ - ERROR - Error during migration for manual_input.sql: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 91, in initial_analysis_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 190, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 100, in initial_analysis_node
+    raise LLMError(f"LLM configuration missing: Key {e} not found in node config. Ensure LLM is passed correctly to graph.stream().")
+src.utils.exceptions.LLMError: LLM configuration missing: Key 'llm' not found in node config. Ensure LLM is passed correctly to graph.stream().
+During task with name 'initial_analysis' and id 'e324e808-1ab3-6a0f-4d39-7ae9b6d635c7'
+2025-06-09 23:07:11,100 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 23:07:11,648 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 23:07:11,648 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 23:07:18,646 - src.utils.logger - INFO - Logging initialized. Log level: DEBUG
+2025-06-09 23:07:18,651 - src.data_processing.file_utils - DEBUG - Read content from file: data/guidelines.txt
+2025-06-09 23:07:18,652 - src.data_processing.file_utils - DEBUG - Read content from file: data/sample_snowflake_procedures.txt
+2025-06-09 23:07:18,653 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: gpt-4o
+2025-06-09 23:07:18,791 - src.llm_config.llm_manager - INFO - Initialized OpenAI LLM: gpt-4o
+2025-06-09 23:07:18,791 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:07:18,794 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:07:18,796 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 23:07:18,796 - src.core.agent_workflow - DEBUG - initial_analysis_node received config: {'configurable': {'llm': ChatOpenAI(client=<openai.resources.chat.completions.completions.Completions object at 0x11350de80>, async_client=<openai.resources.chat.completions.completions.AsyncCompletions object at 0x1159efc80>, root_client=<openai.OpenAI object at 0x113323380>, root_async_client=<openai.AsyncOpenAI object at 0x11350edb0>, model_name='gpt-4o', temperature=0.1, model_kwargs={}, openai_api_key=SecretStr('**********')), '__pregel_task_id': 'f5ffabef-ddab-7ca2-1eb9-a65f40409f2a', '__pregel_send': <built-in method extend of collections.deque object at 0x115995e40>, '__pregel_read': functools.partial(<function local_read at 0x111ac7060>, {'oracle_procedure_code': <langgraph.channels.last_value.LastValue object at 0x115b43540>, 'snowflake_guidelines': <langgraph.channels.last_value.LastValue object at 0x115b40880>, 'sample_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x115b43600>, 'generated_snowflake_code': <langgraph.channels.last_value.LastValue object at 0x115b40740>, 'reflection': <langgraph.channels.last_value.LastValue object at 0x115b41480>, 'errors': <langgraph.channels.last_value.LastValue object at 0x115b41500>, 'current_step': <langgraph.channels.last_value.LastValue object at 0x115b41540>, '__start__': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b41600>, 'branch:to:initial_analysis': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b40300>, 'branch:to:rag_retrieval': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b42e40>, 'branch:to:code_generation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b42e00>, 'branch:to:optimization_and_reflection': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b42b80>, 'branch:to:validation': <langgraph.channels.ephemeral_value.EphemeralValue object at 0x115b42dc0>}, {}, PregelTaskWrites(path=('__pregel_pull', 'initial_analysis'), name='initial_analysis', writes=deque([]), triggers=('branch:to:initial_analysis',))), '__pregel_store': None, '__pregel_checkpointer': None, 'checkpoint_map': {'': '1f045a80-4ed2-6e28-8000-0626eca6d456'}, 'checkpoint_id': None, 'checkpoint_ns': 'initial_analysis:f5ffabef-ddab-7ca2-1eb9-a65f40409f2a', '__pregel_scratchpad': PregelScratchpad(call_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x115b35420>, interrupt_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x115b35450>, get_null_resume=<function _scratchpad.<locals>.get_null_resume at 0x115b16e80>, resume=[], subgraph_counter=<langgraph.pregel.algo.LazyAtomicCounter object at 0x115b35480>), '__pregel_previous': None, '__pregel_call': functools.partial(<function _call at 0x111d02200>, <weakref at 0x115b3ea70; to 'PregelExecutableTask' at 0x115b16f30>, retry=None, futures=<weakref at 0x115b3eb10; to 'FuturesDict' at 0x115b3dd60>, schedule_task=<bound method SyncPregelLoop.accept_push of <langgraph.pregel.loop.SyncPregelLoop object at 0x115b35130>>, submit=<weakref at 0x115b1b1d0; to 'BackgroundExecutor' at 0x115b35220>)}, 'metadata': {'langgraph_step': 1, 'langgraph_node': 'initial_analysis', 'langgraph_triggers': ('branch:to:initial_analysis',), 'langgraph_path': ('__pregel_pull', 'initial_analysis'), 'langgraph_checkpoint_ns': 'initial_analysis:f5ffabef-ddab-7ca2-1eb9-a65f40409f2a'}, 'callbacks': <langchain_core.callbacks.manager.CallbackManager object at 0x115b354c0>}
+2025-06-09 23:07:18,799 - openai._base_client - DEBUG - Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-3c841684-832a-4a5b-94ea-dd1512d3b5ba', 'json_data': {'messages': [{'content': "\nYou are an expert AI Engineer specializing in Oracle PL/SQL to Snowflake SQL/JavaScript procedure migration. Your goal is to accurately and efficiently convert Oracle stored procedures, functions, and anonymous blocks into functionally equivalent and optimized Snowflake procedures. You must ensure no logic is missed and leverage Snowflake's native capabilities for performance. Pay close attention to data types, control flow (loops, cursors), error handling, dynamic SQL, and Oracle-specific functions. You will be provided with user guidelines and sample Snowflake procedures for reference.\n", 'role': 'system'}, {'content': "\n    Analyze the following Oracle PL/SQL procedure. Identify its core logic, variables, control flow, cursor usage, exception handling, and any Oracle-specific features that will require special attention for migration to Snowflake. Provide a summary of the procedure's purpose and a list of identified migration challenges.\n\n    Oracle Procedure:\n    ```sql\n    \n                CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS (\n                    p_employee_id IN NUMBER,\n                    p_employee_name OUT VARCHAR2,\n                    p_salary OUT NUMBER\n                )\n                IS\n                    v_department_id NUMBER;\n                    CURSOR c_emp IS\n                        SELECT employee_name, salary, department_id\n                        FROM employees\n                        WHERE employee_id = p_employee_id;\n                BEGIN\n                    OPEN c_emp;\n                    FETCH c_emp INTO p_employee_name, p_salary, v_department_id;\n                    IF c_emp%NOTFOUND THEN\n                        RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');\n                    END IF;\n                    CLOSE c_emp;\n\n                    UPDATE employees SET last_access_date = SYSDATE WHERE employee_id = p_employee_id;\n\n                    EXCEPTION\n                        WHEN OTHERS THEN\n                            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);\n                            RAISE;\n                END;\n                \n    ```\n    ", 'role': 'user'}], 'model': 'gpt-4o', 'stream': False, 'temperature': 0.1}}
+2025-06-09 23:07:18,827 - openai._base_client - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/chat/completions
+2025-06-09 23:07:18,827 - httpcore.connection - DEBUG - connect_tcp.started host='api.openai.com' port=443 local_address=None timeout=None socket_options=None
+2025-06-09 23:07:18,888 - httpcore.connection - DEBUG - connect_tcp.complete return_value=<httpcore._backends.sync.SyncStream object at 0x115b5e510>
+2025-06-09 23:07:18,888 - httpcore.connection - DEBUG - start_tls.started ssl_context=<ssl.SSLContext object at 0x1135ad950> server_hostname='api.openai.com' timeout=None
+2025-06-09 23:07:18,917 - httpcore.connection - DEBUG - start_tls.complete return_value=<httpcore._backends.sync.SyncStream object at 0x11469eb10>
+2025-06-09 23:07:18,917 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:18,918 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-06-09 23:07:18,918 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-06-09 23:07:18,918 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-06-09 23:07:18,918 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:19,847 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 429, b'Too Many Requests', [(b'Date', b'Tue, 10 Jun 2025 03:07:19 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'337'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_67f1cb522361189cb3522b987d4fe436'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'cf-cache-status', b'DYNAMIC'), (b'Set-Cookie', b'__cf_bm=7vQuKFZBEBF_OcgSKOmc1xPFXtA_3NzIsKc5CLyMZ0Y-1749524839-1.0.1.1-fzq72ir2xKdZoXyGKcynII25l7lgN4a4iujgg0PASlUXnvvrKcsrYqn6R3dVv4U5BmfnVAcJ3rTlUJoT8V0emCanD4qtfyVWW4eYR1URbvc; path=/; expires=Tue, 10-Jun-25 03:37:19 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'X-Content-Type-Options', b'nosniff'), (b'Set-Cookie', b'_cfuvid=lYfTXes9rJPx9qE3rfqAikiqHhiEc7KXyS6Ol_YI7ow-1749524839924-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), (b'Server', b'cloudflare'), (b'CF-RAY', b'94d5a863d9168f78-BOS'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2025-06-09 23:07:19,851 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:07:19,852 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-06-09 23:07:19,852 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-06-09 23:07:19,852 - httpcore.http11 - DEBUG - response_closed.started
+2025-06-09 23:07:19,853 - httpcore.http11 - DEBUG - response_closed.complete
+2025-06-09 23:07:19,853 - openai._base_client - DEBUG - HTTP Response: POST https://api.openai.com/v1/chat/completions "429 Too Many Requests" Headers([('date', 'Tue, 10 Jun 2025 03:07:19 GMT'), ('content-type', 'application/json; charset=utf-8'), ('content-length', '337'), ('connection', 'keep-alive'), ('vary', 'Origin'), ('x-request-id', 'req_67f1cb522361189cb3522b987d4fe436'), ('strict-transport-security', 'max-age=31536000; includeSubDomains; preload'), ('cf-cache-status', 'DYNAMIC'), ('set-cookie', '__cf_bm=7vQuKFZBEBF_OcgSKOmc1xPFXtA_3NzIsKc5CLyMZ0Y-1749524839-1.0.1.1-fzq72ir2xKdZoXyGKcynII25l7lgN4a4iujgg0PASlUXnvvrKcsrYqn6R3dVv4U5BmfnVAcJ3rTlUJoT8V0emCanD4qtfyVWW4eYR1URbvc; path=/; expires=Tue, 10-Jun-25 03:37:19 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('x-content-type-options', 'nosniff'), ('set-cookie', '_cfuvid=lYfTXes9rJPx9qE3rfqAikiqHhiEc7KXyS6Ol_YI7ow-1749524839924-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None'), ('server', 'cloudflare'), ('cf-ray', '94d5a863d9168f78-BOS'), ('alt-svc', 'h3=":443"; ma=86400')])
+2025-06-09 23:07:19,853 - openai._base_client - DEBUG - request_id: req_67f1cb522361189cb3522b987d4fe436
+2025-06-09 23:07:19,854 - openai._base_client - DEBUG - Encountered httpx.HTTPStatusError
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1017, in request
+    response.raise_for_status()
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.openai.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+2025-06-09 23:07:19,856 - openai._base_client - DEBUG - Retrying due to status code 429
+2025-06-09 23:07:19,856 - openai._base_client - DEBUG - 2 retries left
+2025-06-09 23:07:19,857 - openai._base_client - INFO - Retrying request to /chat/completions in 0.485590 seconds
+2025-06-09 23:07:20,348 - openai._base_client - DEBUG - Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-3c841684-832a-4a5b-94ea-dd1512d3b5ba', 'json_data': {'messages': [{'content': "\nYou are an expert AI Engineer specializing in Oracle PL/SQL to Snowflake SQL/JavaScript procedure migration. Your goal is to accurately and efficiently convert Oracle stored procedures, functions, and anonymous blocks into functionally equivalent and optimized Snowflake procedures. You must ensure no logic is missed and leverage Snowflake's native capabilities for performance. Pay close attention to data types, control flow (loops, cursors), error handling, dynamic SQL, and Oracle-specific functions. You will be provided with user guidelines and sample Snowflake procedures for reference.\n", 'role': 'system'}, {'content': "\n    Analyze the following Oracle PL/SQL procedure. Identify its core logic, variables, control flow, cursor usage, exception handling, and any Oracle-specific features that will require special attention for migration to Snowflake. Provide a summary of the procedure's purpose and a list of identified migration challenges.\n\n    Oracle Procedure:\n    ```sql\n    \n                CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS (\n                    p_employee_id IN NUMBER,\n                    p_employee_name OUT VARCHAR2,\n                    p_salary OUT NUMBER\n                )\n                IS\n                    v_department_id NUMBER;\n                    CURSOR c_emp IS\n                        SELECT employee_name, salary, department_id\n                        FROM employees\n                        WHERE employee_id = p_employee_id;\n                BEGIN\n                    OPEN c_emp;\n                    FETCH c_emp INTO p_employee_name, p_salary, v_department_id;\n                    IF c_emp%NOTFOUND THEN\n                        RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');\n                    END IF;\n                    CLOSE c_emp;\n\n                    UPDATE employees SET last_access_date = SYSDATE WHERE employee_id = p_employee_id;\n\n                    EXCEPTION\n                        WHEN OTHERS THEN\n                            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);\n                            RAISE;\n                END;\n                \n    ```\n    ", 'role': 'user'}], 'model': 'gpt-4o', 'stream': False, 'temperature': 0.1}}
+2025-06-09 23:07:20,353 - openai._base_client - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/chat/completions
+2025-06-09 23:07:20,354 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:20,355 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-06-09 23:07:20,356 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-06-09 23:07:20,356 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-06-09 23:07:20,356 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:20,788 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 429, b'Too Many Requests', [(b'Date', b'Tue, 10 Jun 2025 03:07:20 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'337'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_454ae0158a9a3499adcaa76fa01d55d0'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'94d5a86cd8d88f78-BOS'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2025-06-09 23:07:20,789 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:07:20,790 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-06-09 23:07:20,790 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-06-09 23:07:20,790 - httpcore.http11 - DEBUG - response_closed.started
+2025-06-09 23:07:20,790 - httpcore.http11 - DEBUG - response_closed.complete
+2025-06-09 23:07:20,790 - openai._base_client - DEBUG - HTTP Response: POST https://api.openai.com/v1/chat/completions "429 Too Many Requests" Headers({'date': 'Tue, 10 Jun 2025 03:07:20 GMT', 'content-type': 'application/json; charset=utf-8', 'content-length': '337', 'connection': 'keep-alive', 'vary': 'Origin', 'x-request-id': 'req_454ae0158a9a3499adcaa76fa01d55d0', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '94d5a86cd8d88f78-BOS', 'alt-svc': 'h3=":443"; ma=86400'})
+2025-06-09 23:07:20,791 - openai._base_client - DEBUG - request_id: req_454ae0158a9a3499adcaa76fa01d55d0
+2025-06-09 23:07:20,791 - openai._base_client - DEBUG - Encountered httpx.HTTPStatusError
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1017, in request
+    response.raise_for_status()
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.openai.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+2025-06-09 23:07:20,792 - openai._base_client - DEBUG - Retrying due to status code 429
+2025-06-09 23:07:20,792 - openai._base_client - DEBUG - 1 retry left
+2025-06-09 23:07:20,793 - openai._base_client - INFO - Retrying request to /chat/completions in 0.987581 seconds
+2025-06-09 23:07:21,784 - openai._base_client - DEBUG - Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-3c841684-832a-4a5b-94ea-dd1512d3b5ba', 'json_data': {'messages': [{'content': "\nYou are an expert AI Engineer specializing in Oracle PL/SQL to Snowflake SQL/JavaScript procedure migration. Your goal is to accurately and efficiently convert Oracle stored procedures, functions, and anonymous blocks into functionally equivalent and optimized Snowflake procedures. You must ensure no logic is missed and leverage Snowflake's native capabilities for performance. Pay close attention to data types, control flow (loops, cursors), error handling, dynamic SQL, and Oracle-specific functions. You will be provided with user guidelines and sample Snowflake procedures for reference.\n", 'role': 'system'}, {'content': "\n    Analyze the following Oracle PL/SQL procedure. Identify its core logic, variables, control flow, cursor usage, exception handling, and any Oracle-specific features that will require special attention for migration to Snowflake. Provide a summary of the procedure's purpose and a list of identified migration challenges.\n\n    Oracle Procedure:\n    ```sql\n    \n                CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS (\n                    p_employee_id IN NUMBER,\n                    p_employee_name OUT VARCHAR2,\n                    p_salary OUT NUMBER\n                )\n                IS\n                    v_department_id NUMBER;\n                    CURSOR c_emp IS\n                        SELECT employee_name, salary, department_id\n                        FROM employees\n                        WHERE employee_id = p_employee_id;\n                BEGIN\n                    OPEN c_emp;\n                    FETCH c_emp INTO p_employee_name, p_salary, v_department_id;\n                    IF c_emp%NOTFOUND THEN\n                        RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');\n                    END IF;\n                    CLOSE c_emp;\n\n                    UPDATE employees SET last_access_date = SYSDATE WHERE employee_id = p_employee_id;\n\n                    EXCEPTION\n                        WHEN OTHERS THEN\n                            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);\n                            RAISE;\n                END;\n                \n    ```\n    ", 'role': 'user'}], 'model': 'gpt-4o', 'stream': False, 'temperature': 0.1}}
+2025-06-09 23:07:21,788 - openai._base_client - DEBUG - Sending HTTP Request: POST https://api.openai.com/v1/chat/completions
+2025-06-09 23:07:21,788 - httpcore.http11 - DEBUG - send_request_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:21,789 - httpcore.http11 - DEBUG - send_request_headers.complete
+2025-06-09 23:07:21,789 - httpcore.http11 - DEBUG - send_request_body.started request=<Request [b'POST']>
+2025-06-09 23:07:21,789 - httpcore.http11 - DEBUG - send_request_body.complete
+2025-06-09 23:07:21,789 - httpcore.http11 - DEBUG - receive_response_headers.started request=<Request [b'POST']>
+2025-06-09 23:07:22,270 - httpcore.http11 - DEBUG - receive_response_headers.complete return_value=(b'HTTP/1.1', 429, b'Too Many Requests', [(b'Date', b'Tue, 10 Jun 2025 03:07:22 GMT'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Content-Length', b'337'), (b'Connection', b'keep-alive'), (b'vary', b'Origin'), (b'x-request-id', b'req_c422c43c2804b69e21ea0fffa906d0ff'), (b'strict-transport-security', b'max-age=31536000; includeSubDomains; preload'), (b'cf-cache-status', b'DYNAMIC'), (b'X-Content-Type-Options', b'nosniff'), (b'Server', b'cloudflare'), (b'CF-RAY', b'94d5a875c9808f78-BOS'), (b'alt-svc', b'h3=":443"; ma=86400')])
+2025-06-09 23:07:22,271 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:07:22,271 - httpcore.http11 - DEBUG - receive_response_body.started request=<Request [b'POST']>
+2025-06-09 23:07:22,271 - httpcore.http11 - DEBUG - receive_response_body.complete
+2025-06-09 23:07:22,271 - httpcore.http11 - DEBUG - response_closed.started
+2025-06-09 23:07:22,272 - httpcore.http11 - DEBUG - response_closed.complete
+2025-06-09 23:07:22,272 - openai._base_client - DEBUG - HTTP Response: POST https://api.openai.com/v1/chat/completions "429 Too Many Requests" Headers({'date': 'Tue, 10 Jun 2025 03:07:22 GMT', 'content-type': 'application/json; charset=utf-8', 'content-length': '337', 'connection': 'keep-alive', 'vary': 'Origin', 'x-request-id': 'req_c422c43c2804b69e21ea0fffa906d0ff', 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload', 'cf-cache-status': 'DYNAMIC', 'x-content-type-options': 'nosniff', 'server': 'cloudflare', 'cf-ray': '94d5a875c9808f78-BOS', 'alt-svc': 'h3=":443"; ma=86400'})
+2025-06-09 23:07:22,272 - openai._base_client - DEBUG - request_id: req_c422c43c2804b69e21ea0fffa906d0ff
+2025-06-09 23:07:22,272 - openai._base_client - DEBUG - Encountered httpx.HTTPStatusError
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1017, in request
+    response.raise_for_status()
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/httpx/_models.py", line 829, in raise_for_status
+    raise HTTPStatusError(message, request=request, response=self)
+httpx.HTTPStatusError: Client error '429 Too Many Requests' for url 'https://api.openai.com/v1/chat/completions'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
+2025-06-09 23:07:22,273 - openai._base_client - DEBUG - Re-raising status error
+2025-06-09 23:07:22,278 - src.core.agent_workflow - ERROR - Error in initial_analysis_node: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 93, in initial_analysis_node
+    response = llm.invoke(prompt)
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 372, in invoke
+    self.generate_prompt(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 957, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 776, in generate
+    self._generate_with_cache(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1022, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 995, in _generate
+    response = self.client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_utils/_utils.py", line 287, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 925, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1037, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-06-09 23:07:22,286 - __main__ - ERROR - Error during migration for manual_input.sql: LLM failed during initial analysis: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 93, in initial_analysis_node
+    response = llm.invoke(prompt)
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 372, in invoke
+    self.generate_prompt(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 957, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 776, in generate
+    self._generate_with_cache(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1022, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 995, in _generate
+    response = self.client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_utils/_utils.py", line 287, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 925, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1037, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 190, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 103, in initial_analysis_node
+    raise LLMError(f"LLM failed during initial analysis: {e}")
+src.utils.exceptions.LLMError: LLM failed during initial analysis: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+During task with name 'initial_analysis' and id 'f5ffabef-ddab-7ca2-1eb9-a65f40409f2a'
+2025-06-09 23:10:57,264 - httpcore.connection - DEBUG - close.started
+2025-06-09 23:10:57,266 - httpcore.connection - DEBUG - close.complete
+2025-06-09 23:15:04,769 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:16:24,117 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:16:36,164 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:16:52,191 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:16:52,200 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: ollama-mistral
+2025-06-09 23:16:52,210 - src.llm_config.llm_manager - INFO - Initialized Ollama model: mistral at http://localhost:11434
+2025-06-09 23:16:52,210 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:16:52,216 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:16:52,220 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 23:17:22,568 - src.core.agent_workflow - INFO - Initial Analysis:  The provided Oracle PL/SQL procedure, `GET_EMPLOYEE_DETAILS`, is designed to retrieve employee details (name and salary) for a given employee ID, store them in output parameters, and update the last ...
+2025-06-09 23:17:22,582 - src.core.agent_workflow - INFO - Executing rag_retrieval_node
+2025-06-09 23:17:22,582 - src.core.agent_workflow - ERROR - Error in rag_retrieval_node: 'llm'
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 108, in rag_retrieval_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+2025-06-09 23:17:22,584 - __main__ - ERROR - Error during migration for manual_input.sql: Failed during RAG retrieval: 'llm'
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 108, in rag_retrieval_node
+    llm = config["llm"] # Access LLM instance from config
+          ~~~~~~^^^^^^^
+KeyError: 'llm'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 207, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 121, in rag_retrieval_node
+    raise RAGError(f"Failed during RAG retrieval: {e}")
+src.utils.exceptions.RAGError: Failed during RAG retrieval: 'llm'
+During task with name 'rag_retrieval' and id '8aa6996d-318b-1c09-c124-06d5c8178e64'
+2025-06-09 23:19:24,308 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:19:32,969 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:19:32,976 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: gpt-4o
+2025-06-09 23:19:33,116 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:19:33,116 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:19:33,119 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:19:33,121 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 23:19:33,359 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:19:33,360 - openai._base_client - INFO - Retrying request to /chat/completions in 0.412785 seconds
+2025-06-09 23:19:34,530 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:19:34,531 - openai._base_client - INFO - Retrying request to /chat/completions in 0.840113 seconds
+2025-06-09 23:19:36,217 - httpx - INFO - HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 429 Too Many Requests"
+2025-06-09 23:19:36,219 - src.core.agent_workflow - ERROR - Error in initial_analysis_node: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 93, in initial_analysis_node
+    response = llm.invoke(prompt)
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 372, in invoke
+    self.generate_prompt(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 957, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 776, in generate
+    self._generate_with_cache(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1022, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 995, in _generate
+    response = self.client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_utils/_utils.py", line 287, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 925, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1037, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+2025-06-09 23:19:36,228 - __main__ - ERROR - Error during migration for manual_input.sql: LLM failed during initial analysis: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 93, in initial_analysis_node
+    response = llm.invoke(prompt)
+               ^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 372, in invoke
+    self.generate_prompt(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 957, in generate_prompt
+    return self.generate(prompt_messages, stop=stop, callbacks=callbacks, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 776, in generate
+    self._generate_with_cache(
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1022, in _generate_with_cache
+    result = self._generate(
+             ^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 995, in _generate
+    response = self.client.create(**payload)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_utils/_utils.py", line 287, in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 925, in create
+    return self._post(
+           ^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1242, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1037, in request
+    raise self._make_status_error_from_response(err.response) from None
+openai.RateLimitError: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 207, in main
+    for i, s in enumerate(full_stream):
+                ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langgraph/pregel/__init__.py", line 2436, in stream
+    for _ in runner.tick(
+             ^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/core/agent_workflow.py", line 103, in initial_analysis_node
+    raise LLMError(f"LLM failed during initial analysis: {e}")
+src.utils.exceptions.LLMError: LLM failed during initial analysis: Error code: 429 - {'error': {'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, read the docs: https://platform.openai.com/docs/guides/error-codes/api-errors.', 'type': 'insufficient_quota', 'param': None, 'code': 'insufficient_quota'}}
+During task with name 'initial_analysis' and id '8d6b1779-4849-e18a-1346-1f119d220162'
+2025-06-09 23:19:52,453 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:19:54,730 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:19:54,738 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: ollama-codellama
+2025-06-09 23:19:54,740 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-09 23:19:54,740 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:19:54,742 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:19:54,743 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 23:20:22,475 - src.core.agent_workflow - INFO - Initial Analysis: 
+The Oracle PL/SQL procedure `GET_EMPLOYEE_DETAILS` takes two input parameters, `p_employee_id` and `p_salary`, and returns two output parameters, `p_employee_name` and `p_salary`. The procedure uses ...
+2025-06-09 23:20:22,485 - src.core.agent_workflow - INFO - Executing rag_retrieval_node
+2025-06-09 23:20:34,807 - src.core.agent_workflow - INFO - RAG: Retrieving context for query: '
+RAG Query:
+
+1. Data types:
+* NUMBER, VARCHAR2, and DATE are all supported by Snowflake, so no adjustments will be needed to ensure compatibility.
+2. Control flow:
+* Cursors are not natively supported in Snowflake, but there are alternative approaches that can be used to achieve similar functionality. One option is to use a Snowflake stored procedure or UDF (User-Defined Function) to perform the cursor operations. Another option is to use Snowflake's built-in support for SQL and JavaScript procedures, which can be used to perform the same tasks as the Oracle procedure.
+3. Error handling:
+* Snowflake provides a built-in error handling mechanism that can be used to catch and handle errors during execution. This may replace or adapt the custom error handling used in the Oracle procedure.
+4. Dynamic SQL:
+* Dynamic SQL is not natively supported in Snowflake, but there are alternative approaches that can be used to achieve similar functionality. One option is to use Snowflake's built-in support for SQL and JavaScript procedures, which can be used to perform the same tasks as the Oracle procedure. Another option is to use a Snowflake stored procedure or UDF to perform the dynamic SQL operations.
+5. Oracle-specific features:
+* RAISE, OTHERS, and DBMS_OUTPUT are all Oracle-specific features that may need to be replaced or adapted for use in Snowflake. One option is to use Snowflake's built-in error handling mechanism to handle errors and output messages. Another option is to use a Snowflake stored procedure or UDF to perform the same tasks as the Oracle procedure, while avoiding the use of these specific features.
+
+In summary, the migration of this Oracle procedure to Snowflake will require careful attention to data types, control flow mechanisms, error handling, dynamic SQL, and Oracle-specific features. By using Snowflake's native capabilities and following best practices for migrating PL/SQL procedures, it is possible to create functionally equivalent and optimized Snowflake procedures that can be used in a Snowflake environment.'
+2025-06-09 23:20:34,813 - src.data_processing.snowflake_connector - INFO - Performing RAG context retrieval from Snowflake schema with query: 
+RAG Query:
+
+1. Data types:
+* NUMBER, VARCHAR2, and DATE are all supported by Snowflake, so no adjustments will be needed to ensure compatibility.
+2. Control flow:
+* Cursors are not natively supported in Snowflake, but there are alternative approaches that can be used to achieve similar functionality. One option is to use a Snowflake stored procedure or UDF (User-Defined Function) to perform the cursor operations. Another option is to use Snowflake's built-in support for SQL and JavaScript procedures, which can be used to perform the same tasks as the Oracle procedure.
+3. Error handling:
+* Snowflake provides a built-in error handling mechanism that can be used to catch and handle errors during execution. This may replace or adapt the custom error handling used in the Oracle procedure.
+4. Dynamic SQL:
+* Dynamic SQL is not natively supported in Snowflake, but there are alternative approaches that can be used to achieve similar functionality. One option is to use Snowflake's built-in support for SQL and JavaScript procedures, which can be used to perform the same tasks as the Oracle procedure. Another option is to use a Snowflake stored procedure or UDF to perform the dynamic SQL operations.
+5. Oracle-specific features:
+* RAISE, OTHERS, and DBMS_OUTPUT are all Oracle-specific features that may need to be replaced or adapted for use in Snowflake. One option is to use Snowflake's built-in error handling mechanism to handle errors and output messages. Another option is to use a Snowflake stored procedure or UDF to perform the same tasks as the Oracle procedure, while avoiding the use of these specific features.
+
+In summary, the migration of this Oracle procedure to Snowflake will require careful attention to data types, control flow mechanisms, error handling, dynamic SQL, and Oracle-specific features. By using Snowflake's native capabilities and following best practices for migrating PL/SQL procedures, it is possible to create functionally equivalent and optimized Snowflake procedures that can be used in a Snowflake environment.
+2025-06-09 23:20:34,813 - src.core.agent_workflow - INFO - RAG: Successfully retrieved combined context (length: 8239).
+2025-06-09 23:20:34,813 - src.core.agent_workflow - INFO - RAG Context Retrieved.
+2025-06-09 23:20:34,816 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:21:30,260 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:21:30,271 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:21:46,505 - src.core.agent_workflow - INFO - Reflection:   Answer:
+
+1. Logical Equivalence: The generated Snowflake code appears to be functionally equivalent to the original Oracle procedure. However, there may be some minor differences in syntax or semant...
+2025-06-09 23:21:46,507 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:21:46,516 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:22:43,258 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:22:43,275 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:22:59,260 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures appear to be functionally equivalent and optimized for performance. However, there are a few areas where improvements could be made:
+
+1. **Logical Equivalence:** T...
+2025-06-09 23:22:59,261 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:22:59,267 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:23:56,030 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:23:56,038 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:24:12,821 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake code appears to be functionally equivalent and optimized for performance. However, there are a few areas that could be improved:
+
+1. **Logical Equivalence:** The generated Sn...
+2025-06-09 23:24:12,822 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:24:12,830 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:25:10,179 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:25:10,192 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:25:26,632 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures are functionally equivalent to the original Oracle stored procedure, but with some minor syntax changes for better compatibility with Snowflake's SQL language. Her...
+2025-06-09 23:25:26,633 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:25:26,638 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:26:23,868 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:26:23,872 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:26:40,597 - src.core.agent_workflow - INFO - Reflection:   Answer:
+
+1. Logical Equivalence: The generated Snowflake code appears to be functionally equivalent to the original Oracle procedure. However, there may be some minor differences in syntax or semant...
+2025-06-09 23:26:40,598 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:26:40,610 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:27:38,460 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:27:38,466 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:27:56,029 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures appear to be functionally equivalent and optimized for performance. However, there are a few areas where improvements could be made:
+
+1. **Logical Equivalence:** T...
+2025-06-09 23:27:56,032 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:27:56,040 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:28:54,364 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:28:54,370 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:29:13,601 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedure appears to be functionally equivalent and optimized for performance compared to the original Oracle procedure. However, there are a few areas where improvements cou...
+2025-06-09 23:29:13,603 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:29:13,608 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:30:17,263 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:30:17,269 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:30:35,963 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures appear to be functionally equivalent and optimized for performance. However, there are a few areas where improvements could be made:
+
+1. **Logical Equivalence:** T...
+2025-06-09 23:30:35,964 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:30:35,970 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:31:34,894 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:31:34,917 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:31:51,386 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedure appears to be functionally equivalent to the original Oracle procedure, with some minor syntax changes for compatibility with Snowflake's SQL language. However, the...
+2025-06-09 23:31:51,386 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:31:51,395 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:32:49,538 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:32:49,554 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:33:05,825 - src.core.agent_workflow - INFO - Reflection:   Answer:
+
+1. Logical Equivalence: The generated Snowflake procedure is functionally equivalent to the original Oracle procedure, with some minor syntax changes for compatibility with Snowflake's SQL ...
+2025-06-09 23:33:05,826 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:33:05,831 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:34:03,757 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:34:03,762 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:34:19,033 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures are functionally equivalent to the original Oracle stored procedure and follow best practices for naming conventions and syntax. However, there are some areas wher...
+2025-06-09 23:34:19,034 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization.
+2025-06-09 23:34:19,041 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:35:16,144 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:51:07,663 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:51:08,471 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:51:08,471 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:51:08,474 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:51:08,476 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:10,118 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:52:10,715 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:52:10,715 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:10,718 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:10,720 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:33,809 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:52:33,815 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:52:33,816 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:33,819 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:33,820 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:36,288 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:52:36,296 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:52:36,296 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:36,301 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:36,303 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:37,647 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:52:37,660 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:52:37,661 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:37,664 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:37,665 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:41,761 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:52:41,767 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:52:41,767 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:41,773 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:41,774 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:52:41,775 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: ollama-codellama
+2025-06-09 23:52:41,776 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-09 23:52:41,776 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:52:41,782 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:52:41,785 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-09 23:52:58,184 - src.core.agent_workflow - INFO - Initial Analysis: 
+The Oracle PL/SQL procedure `GET_EMPLOYEE_DETAILS` takes two input parameters, `p_employee_id` and `p_employee_name`, and two output parameters, `p_salary` and `v_department_id`. The procedure first ...
+2025-06-09 23:52:58,192 - src.core.agent_workflow - INFO - Executing rag_retrieval_node
+2025-06-09 23:53:12,165 - src.core.agent_workflow - INFO - RAG: Retrieving context for query: '
+RAG Query:
+
+1. Migrate the cursor-based logic to Snowflake's native support for SQL queries.
+2. Convert dynamic SQL to Snowflake's native support for SQL queries.
+3. Migrate Oracle-specific features such as cursors and exception handling to Snowflake's native support for these features.
+4. Ensure that the procedure's output parameters are correctly defined and used in the Snowflake procedure.
+5. Test the converted procedure to ensure that it functions correctly and performs optimally on Snowflake.
+
+Guidelines:
+
+1. Use Snowflake's native support for SQL queries instead of cursors to fetch data from the `employees` table.
+2. Use Snowflake's native support for dynamic SQL to update the `last_access_date` column of the corresponding employee record in the `employees` table.
+3. Migrate Oracle-specific exception handling to Snowflake's native support for error handling, such as using the `RAISE_APPLICATION_ERROR` function with a specific error code and message.
+4. Define the procedure's output parameters correctly in the Snowflake procedure, including the data types and any necessary conversions.
+5. Test the converted procedure thoroughly to ensure that it functions correctly and performs optimally on Snowflake.
+
+Sample Snowflake Procedure:
+```sql
+CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS(
+  p_employee_id IN NUMBER,
+  p_employee_name IN VARCHAR2,
+  p_salary OUT NUMBER,
+  v_department_id OUT NUMBER)
+AS
+BEGIN
+  -- Migrate cursor-based logic to Snowflake's native support for SQL queries
+  SELECT salary INTO p_salary FROM employees WHERE employee_id = p_employee_id;
+  
+  -- Convert dynamic SQL to Snowflake's native support for SQL queries
+  UPDATE employees SET last_access_date = CURRENT_TIMESTAMP WHERE employee_id = p_employee_id;
+  
+  -- Migrate Oracle-specific exception handling to Snowflake's native support for error handling
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');
+END;
+```'
+2025-06-09 23:53:12,173 - src.data_processing.snowflake_connector - INFO - Performing RAG context retrieval from Snowflake schema with query: 
+RAG Query:
+
+1. Migrate the cursor-based logic to Snowflake's native support for SQL queries.
+2. Convert dynamic SQL to Snowflake's native support for SQL queries.
+3. Migrate Oracle-specific features such as cursors and exception handling to Snowflake's native support for these features.
+4. Ensure that the procedure's output parameters are correctly defined and used in the Snowflake procedure.
+5. Test the converted procedure to ensure that it functions correctly and performs optimally on Snowflake.
+
+Guidelines:
+
+1. Use Snowflake's native support for SQL queries instead of cursors to fetch data from the `employees` table.
+2. Use Snowflake's native support for dynamic SQL to update the `last_access_date` column of the corresponding employee record in the `employees` table.
+3. Migrate Oracle-specific exception handling to Snowflake's native support for error handling, such as using the `RAISE_APPLICATION_ERROR` function with a specific error code and message.
+4. Define the procedure's output parameters correctly in the Snowflake procedure, including the data types and any necessary conversions.
+5. Test the converted procedure thoroughly to ensure that it functions correctly and performs optimally on Snowflake.
+
+Sample Snowflake Procedure:
+```sql
+CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS(
+  p_employee_id IN NUMBER,
+  p_employee_name IN VARCHAR2,
+  p_salary OUT NUMBER,
+  v_department_id OUT NUMBER)
+AS
+BEGIN
+  -- Migrate cursor-based logic to Snowflake's native support for SQL queries
+  SELECT salary INTO p_salary FROM employees WHERE employee_id = p_employee_id;
+  
+  -- Convert dynamic SQL to Snowflake's native support for SQL queries
+  UPDATE employees SET last_access_date = CURRENT_TIMESTAMP WHERE employee_id = p_employee_id;
+  
+  -- Migrate Oracle-specific exception handling to Snowflake's native support for error handling
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+    RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');
+END;
+```
+2025-06-09 23:53:12,174 - src.core.agent_workflow - INFO - RAG: Successfully retrieved combined context (length: 8239).
+2025-06-09 23:53:12,175 - src.core.agent_workflow - INFO - RAG Context Retrieved.
+2025-06-09 23:53:12,177 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-09 23:54:08,129 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-09 23:54:08,137 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-09 23:54:08,139 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 1
+2025-06-09 23:54:24,543 - src.core.agent_workflow - INFO - Reflection:   The generated Snowflake procedures appear to be functionally equivalent and optimized for performance. However, there are a few areas where improvements could be made:
+
+1. **Logical Equivalence:** T...
+2025-06-09 23:54:24,544 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-09 23:54:24,554 - src.core.agent_workflow - INFO - Executing validation_node
+2025-06-09 23:54:24,554 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation.
+2025-06-09 23:54:24,555 - src.core.agent_workflow - WARNING - Simulated validation failed: missing BEGIN/END or AS $$ in Snowflake code.
+2025-06-09 23:54:24,556 - src.core.agent_workflow - WARNING - Snowflake code failed syntax validation.
+2025-06-09 23:54:24,557 - __main__ - INFO - Migration successful for manual_input.sql
+2025-06-09 23:54:55,615 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-09 23:54:55,626 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-09 23:54:55,626 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-09 23:54:55,633 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-09 23:54:55,634 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 204, in main
+    graph_bytes = graph_to_draw.draw_png()  # This will return bytes
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-09 23:57:34,862 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:00:01,559 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:00:09,525 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:00:11,633 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:00:16,440 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:00:16,448 - __main__ - INFO - Migration initiated for 1 Oracle procedures using LLM: ollama-qwen2.5
+2025-06-10 00:00:16,451 - src.llm_config.llm_manager - INFO - Initialized Ollama model: qwen2.5 at http://localhost:11434
+2025-06-10 00:00:16,451 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow.
+2025-06-10 00:00:16,455 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully.
+2025-06-10 00:00:16,458 - src.core.agent_workflow - INFO - Executing initial_analysis_node
+2025-06-10 00:00:43,832 - src.core.agent_workflow - INFO - Initial Analysis: ### Summary of the Oracle Procedure
+
+The provided Oracle PL/SQL procedure, `GET_EMPLOYEE_DETAILS`, serves to retrieve employee details such as name and salary from a table named `employees` based on a...
+2025-06-10 00:00:43,838 - src.core.agent_workflow - INFO - Executing rag_retrieval_node
+2025-06-10 00:00:51,833 - src.core.agent_workflow - INFO - RAG: Retrieving context for query: 'Based on the provided Oracle procedure analysis, here is a concise query to retrieve relevant examples and guidelines for its migration from a RAG knowledge base:
+
+```sql
+SELECT 
+    example.*
+FROM 
+    knowledge_base.oracle_procedures 
+WHERE 
+    (procedure_name = 'GET_EMPLOYEE_DETAILS' AND database_system = 'Oracle') 
+    OR 
+    (keywords LIKE '%cursor%' AND keywords LIKE '%output parameters%' AND keywords LIKE '%exception handling%')
+ORDER BY 
+    relevance DESC, 
+    last_updated_date DESC;
+```
+
+### Explanation:
+- **Procedure Name**: Filters for the specific procedure name `GET_EMPLOYEE_DETAILS`.
+- **Database System**: Ensures the examples are from Oracle.
+- **Keywords**: Includes filters for cursor usage, output parameters, and exception handling to focus on relevant content.
+- **Relevance and Last Updated Date**: Orders the results by relevance and last update date to prioritize more recent and pertinent information.
+
+This query will help you find detailed examples and guidelines related to migrating cursors, handling output parameters, and managing exceptions in Oracle procedures to Snowflake.'
+2025-06-10 00:00:51,833 - src.data_processing.snowflake_connector - INFO - Performing RAG context retrieval from Snowflake schema with query: Based on the provided Oracle procedure analysis, here is a concise query to retrieve relevant examples and guidelines for its migration from a RAG knowledge base:
+
+```sql
+SELECT 
+    example.*
+FROM 
+    knowledge_base.oracle_procedures 
+WHERE 
+    (procedure_name = 'GET_EMPLOYEE_DETAILS' AND database_system = 'Oracle') 
+    OR 
+    (keywords LIKE '%cursor%' AND keywords LIKE '%output parameters%' AND keywords LIKE '%exception handling%')
+ORDER BY 
+    relevance DESC, 
+    last_updated_date DESC;
+```
+
+### Explanation:
+- **Procedure Name**: Filters for the specific procedure name `GET_EMPLOYEE_DETAILS`.
+- **Database System**: Ensures the examples are from Oracle.
+- **Keywords**: Includes filters for cursor usage, output parameters, and exception handling to focus on relevant content.
+- **Relevance and Last Updated Date**: Orders the results by relevance and last update date to prioritize more recent and pertinent information.
+
+This query will help you find detailed examples and guidelines related to migrating cursors, handling output parameters, and managing exceptions in Oracle procedures to Snowflake.
+2025-06-10 00:00:51,834 - src.core.agent_workflow - INFO - RAG: Successfully retrieved combined context (length: 8239).
+2025-06-10 00:00:51,834 - src.core.agent_workflow - INFO - RAG Context Retrieved.
+2025-06-10 00:00:51,836 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-10 00:01:22,606 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-10 00:01:22,616 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-10 00:01:22,617 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 2
+2025-06-10 00:01:49,631 - src.core.agent_workflow - INFO - Reflection: ### Review of Migrated Snowflake Procedure
+
+#### 1. Logical Equivalence:
+- **Oracle Logic**: The original Oracle procedure fetches employee details from the `employees` table based on a given `employe...
+2025-06-10 00:01:49,632 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-10 00:01:49,634 - src.core.agent_workflow - INFO - Executing code_generation_node
+2025-06-10 00:02:24,311 - src.core.agent_workflow - INFO - Initial Snowflake code generated.
+2025-06-10 00:02:24,317 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node
+2025-06-10 00:02:24,317 - src.core.agent_workflow - INFO - Starting optimization cycle 2 / 2
+2025-06-10 00:02:53,089 - src.core.agent_workflow - INFO - Reflection: ### Review of Migrated Snowflake Procedure
+
+#### 1. Logical Equivalence:
+- **Oracle Logic**: The original Oracle procedure fetches employee details from the `employees` table based on `employee_id`, u...
+2025-06-10 00:02:53,089 - src.core.agent_workflow - INFO - LLM determined no further optimization needed after 2 cycles.
+2025-06-10 00:02:53,092 - src.core.agent_workflow - INFO - Executing validation_node
+2025-06-10 00:02:53,092 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation.
+2025-06-10 00:02:53,092 - src.core.agent_workflow - WARNING - Simulated validation failed: missing BEGIN/END or AS $$ in Snowflake code.
+2025-06-10 00:02:53,092 - src.core.agent_workflow - WARNING - Snowflake code failed syntax validation.
+2025-06-10 00:02:53,095 - __main__ - INFO - Migration successful for manual_input.sql
+2025-06-10 00:15:30,332 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:15:31,121 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:15:31,121 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:15:31,125 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:15:31,126 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:15:34,977 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:15:34,985 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:15:34,985 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:15:34,991 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:15:34,992 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:15:40,532 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:15:40,539 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:15:40,539 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:15:40,545 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:15:40,546 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:15:42,668 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:15:42,680 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:15:42,680 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:15:42,688 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:15:42,689 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:15:43,313 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:15:43,323 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:15:43,323 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:15:43,330 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:15:43,331 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:16:11,780 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 00:16:11,787 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-10 00:16:11,787 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-10 00:16:11,792 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-10 00:16:11,793 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/src/ui/app.py", line 228, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/oracle_snowflake_migration/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-10 00:16:11,795 - __main__ - INFO - Migration initiated for 1 Oracle View(s) using LLM: ollama-qwen2.5
+2025-06-10 00:16:11,796 - src.llm_config.llm_manager - INFO - Initialized Ollama model: qwen2.5 at http://localhost:11434
+2025-06-10 00:16:11,797 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for View.
+2025-06-10 00:16:11,802 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for View.
+2025-06-10 00:16:11,806 - src.core.agent_workflow - INFO - Executing initial_analysis_node for View
+2025-06-10 00:16:34,929 - src.core.agent_workflow - INFO - Initial Analysis: ### Summary of the Oracle View
+
+**Purpose:**
+The view `MY_SCHEMA.EMPLOYEE_SALARY_VW` is designed to display a list of employees who earn more than the average salary across all employees, along with t...
+2025-06-10 00:16:34,937 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for View
+2025-06-10 00:16:52,547 - src.core.agent_workflow - INFO - RAG: Retrieving context for query: '### RAG Query for Migration Guidelines
+
+**Keywords Identified:**
+- **Oracle-specific features:** Outer join using `+`, subquery for average salary calculation.
+- **Data types:** No specific data type issues noted, but ensure proper handling of numeric and string data types.
+- **Control flow/SQL constructs:** Use of ANSI standard syntax for joins, correlated subqueries.
+
+**Relevant Examples and Guidelines:**
+
+1. **Join Syntax:**
+   - Oracle uses the `+` symbol for outer joins, which is not supported in Snowflake. You will need to use an explicit `LEFT JOIN` or `FULL OUTER JOIN` depending on your requirements.
+   
+2. **Subquery for Average Salary Calculation:**
+   - The subquery used to calculate the average salary can be directly translated into a window function in Snowflake, which is more efficient and idiomatic.
+
+3. **WITH READ ONLY Clause:**
+   - There is no direct equivalent of `WITH READ ONLY` in Snowflake. This clause typically indicates that the view cannot be modified, but this behavior should be enforced through other means such as granting appropriate privileges or using a materialized view if necessary.
+
+4. **Performance Considerations:**
+   - Ensure that proper indexes are in place on the `employees.department_id` and `departments.department_id` columns to optimize join performance.
+   - The subquery for calculating the average salary can be optimized by using a window function like `AVG()` over a partition, which is more efficient.
+
+### Snowflake Migration
+
+Here's how you might rewrite the view in Snowflake:
+
+```sql
+CREATE OR REPLACE VIEW MY_SCHEMA.EMPLOYEE_SALARY_VW AS
+SELECT
+    e.employee_id,
+    e.employee_name,
+    e.salary,
+    d.department_name
+FROM
+    employees e
+JOIN
+    departments d ON e.department_id = d.department_id
+WHERE
+    e.salary > (SELECT AVG(salary) FROM employees);
+```
+
+### Explanation of Changes:
+
+1. **Join Syntax:**
+   - Replaced the outer join with an `INNER JOIN` since the subquery will filter out non-matching rows.
+
+2. **Subquery for Average Salary Calculation:**
+   - Used a standard subquery to calculate the average salary across all employees, which is more efficient and idiomatic in Snowflake.
+
+3. **WITH READ ONLY Clause:**
+   - Removed as there is no direct equivalent in Snowflake views. This clause typically indicates that the view cannot be modified, but this behavior should be enforced through other means such as granting appropriate privileges or using a materialized view if necessary.
+
+4. **Performance Considerations:**
+   - Ensure proper indexing on `employees.department_id` and `departments.department_id` to optimize join performance.
+   - The subquery for calculating the average salary is straightforward and efficient in Snowflake.
+
+By following these steps, you can effectively migrate the Oracle view to Snowflake while maintaining its functionality and optimizing for performance.' for object type: View
+2025-06-10 00:16:52,555 - src.core.agent_workflow - WARNING - Failed to retrieve dynamic RAG from Snowflake schema: get_rag_context_from_snowflake_schema() missing 1 required positional argument: 'object_type'
+2025-06-10 00:16:52,556 - src.core.agent_workflow - INFO - RAG: Successfully retrieved combined context (length: 8492).
+2025-06-10 00:16:52,556 - src.core.agent_workflow - INFO - RAG Context Retrieved.
+2025-06-10 00:16:52,559 - src.core.agent_workflow - INFO - Executing code_generation_node for View
+2025-06-10 00:17:42,334 - src.core.agent_workflow - INFO - Initial Snowflake View code generated.
+2025-06-10 00:17:42,344 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for View
+2025-06-10 00:17:42,345 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 1
+2025-06-10 00:17:58,538 - src.core.agent_workflow - INFO - Reflection: ### Review of Generated Snowflake View
+
+#### Original Oracle View:
+```sql
+CREATE OR REPLACE VIEW MY_SCHEMA.EMPLOYEE_SALARY_VW AS
+SELECT
+    e.employee_id,
+    e.employee_name,
+    e.salary,
+    d.depa...
+2025-06-10 00:17:58,539 - src.core.agent_workflow - INFO - LLM determined no further optimization needed after 1 cycles.
+2025-06-10 00:17:58,543 - src.core.agent_workflow - INFO - Executing validation_node for View
+2025-06-10 00:17:58,543 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for View.
+2025-06-10 00:17:58,543 - src.core.agent_workflow - WARNING - Simulated validation found errors for View: View missing expected 'CREATE OR REPLACE VIEW' or 'AS SELECT' structure., Oracle (+) outer join syntax detected in view.
+2025-06-10 00:17:58,543 - src.core.agent_workflow - WARNING - Snowflake View code failed syntax validation.
+2025-06-10 00:17:58,546 - __main__ - INFO - Migration successful for View manual_input.sql
+2025-06-10 22:14:46,378 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-10 22:14:48,711 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-10 22:14:48,712 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/ui/app.py", line 223, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-11 00:20:27,621 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:20:29,567 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-11 00:20:29,567 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-11 00:20:29,571 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-11 00:20:29,573 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/ui/app.py", line 229, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-11 00:20:37,455 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:20:37,464 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-11 00:20:37,464 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-11 00:20:37,468 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-11 00:20:37,469 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/ui/app.py", line 229, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-11 00:20:42,083 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:20:42,087 - src.llm_config.llm_manager - INFO - Initialized OpenAI model: gpt-4o
+2025-06-11 00:20:42,087 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-11 00:20:42,091 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-11 00:20:42,092 - __main__ - ERROR - Error generating workflow visualization: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 138, in draw
+    import pygraphviz as pgv  # type: ignore[import-not-found]
+    ^^^^^^^^^^^^^^^^^^^^^^^^
+ModuleNotFoundError: No module named 'pygraphviz'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/src/ui/app.py", line 229, in main
+    graph_bytes = graph_to_draw.draw_png()
+                  ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph.py", line 574, in draw_png
+    ).draw(self, output_file_path)
+      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/oracle_snowflake_migration_gemini/.venv/lib/python3.12/site-packages/langchain_core/runnables/graph_png.py", line 141, in draw
+    raise ImportError(msg) from exc
+ImportError: Install pygraphviz to draw graphs: `pip install pygraphviz`.
+2025-06-11 00:20:42,093 - __main__ - INFO - Migration initiated for 1 Oracle Procedure(s) using LLM: ollama-codellama
+2025-06-11 00:20:42,094 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-11 00:20:42,094 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-11 00:20:42,098 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-11 00:20:42,100 - src.core.agent_workflow - INFO - Executing initial_analysis_node for Procedure
+2025-06-11 00:21:09,684 - src.core.agent_workflow - INFO - Initial Analysis: 
+The purpose of this procedure is to retrieve the details of an employee based on their ID, update the last access date for that employee, and return the employee's name and salary. The procedure uses...
+2025-06-11 00:21:09,693 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for Procedure
+2025-06-11 00:21:46,981 - src.rag.retriever - INFO - Performing semantic search for query: '
+```sql
+CREATE OR REPLACE PROCEDURE get_employee_d...' (k=5)
+2025-06-11 00:21:47,015 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-11 00:21:47,499 - src.rag.vector_store - INFO - Initialized ChromaDB client at: data/vector_store
+2025-06-11 00:22:10,506 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-11 00:22:12,395 - src.rag.vector_store - INFO - Accessed/Created ChromaDB collection: snowflake_migration_examples
+2025-06-11 00:22:12,530 - src.rag.vector_store - INFO - Retrieved 0 documents from ChromaDB for query.
+2025-06-11 00:22:12,530 - src.rag.retriever - INFO - Performing keyword search for query: '
+```sql
+CREATE OR REPLACE PROCEDURE get_employee_d...' (k=5)
+2025-06-11 00:22:12,530 - src.rag.retriever - INFO - Initializing BM25 retriever...
+2025-06-11 00:22:12,531 - src.rag.retriever - WARNING - No documents in ChromaDB collection for BM25 initialization.
+2025-06-11 00:22:12,531 - src.rag.retriever - WARNING - BM25 retriever not initialized. Skipping keyword search.
+2025-06-11 00:22:12,531 - src.rag.retriever - INFO - Applied RRF to fuse results. Total fused: 0
+2025-06-11 00:22:12,531 - src.rag.retriever - INFO - Hybrid retrieval completed, returning 0 documents.
+2025-06-11 00:22:12,531 - src.core.agent_workflow - INFO - RAG Context Retrieved.
+2025-06-11 00:22:12,533 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-11 00:22:31,899 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-11 00:22:31,908 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-11 00:22:31,909 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 3
+2025-06-11 00:22:46,710 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no logic missed from the Oracle Procedure. The generated Snowflake code is functionally equivalent to the original procedure, with some minor syntax changes for S...
+2025-06-11 00:22:46,711 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-11 00:22:46,715 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-11 00:23:11,849 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-11 00:23:11,855 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-11 00:23:11,856 - src.core.agent_workflow - INFO - Starting optimization cycle 2 / 3
+2025-06-11 00:23:27,398 - src.core.agent_workflow - INFO - Reflection:  1. Logical Equivalence: No, there is no logic missed from the Oracle Procedure. The generated Snowflake code is functionally equivalent to the original Oracle procedure.
+2. Snowflake Optimization: Ye...
+2025-06-11 00:23:27,399 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 2 cycles.
+2025-06-11 00:23:27,409 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-11 00:23:50,883 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-11 00:23:50,890 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-11 00:23:50,891 - src.core.agent_workflow - INFO - Starting optimization cycle 3 / 3
+2025-06-11 00:24:02,902 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No logic is missed from the original Oracle Procedure. The generated Snowflake code is functionally equivalent to the original procedure, with some minor syntax changes for co...
+2025-06-11 00:24:02,903 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 3 cycles.
+2025-06-11 00:24:02,918 - src.core.agent_workflow - INFO - Executing validation_node for Procedure
+2025-06-11 00:24:02,918 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for Procedure.
+2025-06-11 00:24:02,918 - src.core.agent_workflow - INFO - Simulated validation passed for Procedure.
+2025-06-11 00:24:02,918 - src.core.agent_workflow - INFO - Snowflake Procedure code passed syntax validation.
+2025-06-11 00:24:02,922 - __main__ - INFO - Migration successful for Procedure manual_input.sql
+2025-06-11 00:31:11,078 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:31:11,079 - main - INFO - Oracle to Snowflake Migration API starting up...
+2025-06-11 00:31:11,079 - main - INFO - API will listen on http://0.0.0.0:8000/api/v1
+2025-06-11 00:31:12,997 - main - INFO - Oracle to Snowflake Migration API shutting down.
+2025-06-11 00:31:16,949 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:31:16,949 - main - INFO - Oracle to Snowflake Migration API starting up...
+2025-06-11 00:31:16,949 - main - INFO - API will listen on http://0.0.0.0:8000/api/v1
+2025-06-11 00:35:44,606 - main - INFO - Oracle to Snowflake Migration API shutting down.
+2025-06-11 00:35:45,500 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-11 00:35:45,501 - main - INFO - Oracle to Snowflake Migration API starting up...
+2025-06-11 00:35:45,501 - main - INFO - API will listen on http://0.0.0.0:8000/api/v1
+2025-06-11 00:37:45,867 - main - INFO - Oracle to Snowflake Migration API shutting down.
+2025-06-13 22:23:17,918 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:24:09,280 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:24:11,087 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:24:11,087 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:24:16,612 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:24:16,620 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:24:16,620 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:24:29,869 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:24:29,878 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:24:29,878 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:24:36,637 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:24:36,645 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:24:36,645 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:24:36,646 - __main__ - INFO - Migration initiated for 1 Oracle Procedure(s) using LLM: ollama-codellama
+2025-06-13 22:24:36,650 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-13 22:24:36,650 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-13 22:24:36,656 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-13 22:24:36,658 - src.core.agent_workflow - INFO - Executing initial_analysis_node for Procedure
+2025-06-13 22:24:58,772 - src.core.agent_workflow - INFO - Initial Analysis: 
+The purpose of this Oracle procedure is to retrieve the details of an employee based on their ID, update the last access date for that employee in the employees table, and return the employee's name ...
+2025-06-13 22:24:58,780 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for Procedure
+2025-06-13 22:25:41,402 - src.rag.retriever - INFO - Performing semantic search for query: '
+RAG Query for Migrating an Oracle Procedure to Sn...' (k=5)
+2025-06-13 22:25:41,428 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-13 22:25:41,861 - src.rag.vector_store - INFO - Initialized ChromaDB client at: data/vector_store
+2025-06-13 22:26:04,419 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-13 22:26:05,637 - src.rag.vector_store - INFO - Accessed/Created ChromaDB collection: snowflake_migration_examples
+2025-06-13 22:26:05,754 - src.rag.vector_store - INFO - Retrieved 0 documents from ChromaDB for query.
+2025-06-13 22:26:05,755 - src.rag.retriever - INFO - Performing keyword search for query: '
+RAG Query for Migrating an Oracle Procedure to Sn...' (k=5)
+2025-06-13 22:26:05,755 - src.rag.retriever - INFO - Initializing BM25 retriever...
+2025-06-13 22:26:05,755 - src.rag.retriever - WARNING - No documents in ChromaDB collection for BM25 initialization.
+2025-06-13 22:26:05,755 - src.rag.retriever - WARNING - BM25 retriever not initialized. Skipping keyword search.
+2025-06-13 22:26:05,755 - src.rag.retriever - INFO - Applied RRF to fuse results. Total fused: 0
+2025-06-13 22:26:05,755 - src.rag.retriever - INFO - Hybrid retrieval completed, returning 0 documents.
+2025-06-13 22:26:05,755 - src.core.agent_workflow - INFO - RAG Context Retrieved. 0 documents.
+2025-06-13 22:26:05,755 - src.core.agent_workflow - INFO - Object is not a large view or is a procedure. Branching to direct generation.
+2025-06-13 22:26:05,757 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-13 22:26:05,757 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-13 22:26:30,212 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-13 22:26:30,216 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-13 22:26:30,220 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-13 22:26:30,222 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 3
+2025-06-13 22:26:43,639 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no logic missed from the original Oracle procedure. The generated Snowflake code is functionally equivalent to the original procedure, with some minor adjustments...
+2025-06-13 22:26:43,640 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-13 22:26:43,640 - src.core.agent_workflow - INFO - Continuing optimization: Cycle 1/3. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-13 22:26:43,643 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-13 22:26:43,644 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-13 22:27:02,558 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-13 22:27:02,560 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-13 22:27:02,571 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-13 22:27:02,574 - src.core.agent_workflow - INFO - Starting optimization cycle 2 / 3
+2025-06-13 22:27:12,641 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no logic missed from the Oracle Procedure. The generated Snowflake code includes all the necessary logic to retrieve employee details and update the last access d...
+2025-06-13 22:27:12,641 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 2 cycles.
+2025-06-13 22:27:12,642 - src.core.agent_workflow - INFO - Continuing optimization: Cycle 2/3. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-13 22:27:12,645 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-13 22:27:12,645 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-13 22:27:39,820 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-13 22:27:39,824 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-13 22:27:39,840 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-13 22:27:39,842 - src.core.agent_workflow - INFO - Starting optimization cycle 3 / 3
+2025-06-13 22:27:51,965 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no missing logic from the original Oracle procedure. The generated Snowflake code includes all the necessary statements to perform the same functionality as the o...
+2025-06-13 22:27:51,965 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 3 cycles.
+2025-06-13 22:27:51,966 - src.core.agent_workflow - INFO - Stopping optimization. Max cycles reached or no further optimization needed. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-13 22:27:51,969 - src.core.agent_workflow - INFO - Executing validation_node for Procedure
+2025-06-13 22:27:51,969 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for Procedure.
+2025-06-13 22:27:51,969 - src.core.agent_workflow - INFO - Simulated validation passed for Procedure.
+2025-06-13 22:27:51,969 - src.core.agent_workflow - INFO - Snowflake Procedure code passed syntax validation.
+2025-06-13 22:27:51,976 - __main__ - INFO - Migration successful for Procedure manual_input.sql
+2025-06-13 22:31:00,174 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:31:01,007 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:31:01,008 - __main__ - ERROR - Error generating workflow visualization: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:33:01,586 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:10,569 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:11,969 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:13,322 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:13,557 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:13,811 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:14,053 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:24,845 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:24,938 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:29,821 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:32,990 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:32,997 - __main__ - INFO - Migration initiated for 1 Oracle View(s) using LLM: gpt-4o
+2025-06-13 22:33:32,998 - src.llm_config.llm_manager - ERROR - Failed to initialize LLM 'gpt-4o'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+2025-06-13 22:33:32,999 - __main__ - ERROR - Migration specific error: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 23, in get_llm
+    raise LLMError("OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.")
+src.utils.exceptions.LLMError: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/ui/app.py", line 277, in main
+    llm_instance = llm_manager.get_llm()
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/Work/GenAI/oracle_snowflake_migration_gemini/src/llm_config/llm_manager.py", line 41, in get_llm
+    raise LLMError(f"Failed to initialize LLM: {e}. Check your API keys, Ollama server status, or model name.")
+src.utils.exceptions.LLMError: Failed to initialize LLM: OpenAI API Key not found. Please set OPENAI_API_KEY in your .env file.. Check your API keys, Ollama server status, or model name.
+2025-06-13 22:33:38,937 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:40,458 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 22:33:40,466 - __main__ - INFO - Migration initiated for 1 Oracle View(s) using LLM: ollama-codellama
+2025-06-13 22:33:40,471 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-13 22:33:40,471 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for View.
+2025-06-13 22:33:40,482 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for View.
+2025-06-13 22:33:40,485 - src.core.agent_workflow - INFO - Executing initial_analysis_node for View
+2025-06-13 22:33:53,962 - src.core.agent_workflow - INFO - Initial Analysis: 
+The Oracle View `MY_SCHEMA.EMPLOYEE_SALARY_VW` is a complex view that uses several advanced features of the Oracle SQL language, including:
+
+* The `NO_MERGE` hint to prevent the view from being merge...
+2025-06-13 22:33:53,968 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for View
+2025-06-13 22:34:14,361 - src.rag.retriever - INFO - Performing semantic search for query: '
+RAG Query:
+```sql
+CREATE VIEW MY_SCHEMA.EMPLOYEE_...' (k=5)
+2025-06-13 22:34:14,381 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-13 22:34:14,443 - src.rag.vector_store - INFO - Initialized ChromaDB client at: data/vector_store
+2025-06-13 22:34:17,601 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: all-MiniLM-L6-v2
+2025-06-13 22:34:19,413 - src.rag.vector_store - INFO - Accessed/Created ChromaDB collection: snowflake_migration_examples
+2025-06-13 22:34:19,547 - src.rag.vector_store - INFO - Retrieved 0 documents from ChromaDB for query.
+2025-06-13 22:34:19,548 - src.rag.retriever - INFO - Performing keyword search for query: '
+RAG Query:
+```sql
+CREATE VIEW MY_SCHEMA.EMPLOYEE_...' (k=5)
+2025-06-13 22:34:19,548 - src.rag.retriever - INFO - Initializing BM25 retriever...
+2025-06-13 22:34:19,548 - src.rag.retriever - WARNING - No documents in ChromaDB collection for BM25 initialization.
+2025-06-13 22:34:19,548 - src.rag.retriever - WARNING - BM25 retriever not initialized. Skipping keyword search.
+2025-06-13 22:34:19,548 - src.rag.retriever - INFO - Applied RRF to fuse results. Total fused: 0
+2025-06-13 22:34:19,548 - src.rag.retriever - INFO - Hybrid retrieval completed, returning 0 documents.
+2025-06-13 22:34:19,548 - src.core.agent_workflow - INFO - RAG Context Retrieved. 0 documents.
+2025-06-13 22:34:19,549 - src.core.agent_workflow - INFO - Object is not a large view or is a procedure. Branching to direct generation.
+2025-06-13 22:34:19,550 - src.core.agent_workflow - INFO - Executing code_generation_node for View
+2025-06-13 22:34:19,550 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-13 22:34:34,575 - src.core.agent_workflow - INFO - Initial Snowflake View code generated.
+2025-06-13 22:34:34,578 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-13 22:34:34,581 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for View
+2025-06-13 22:34:34,582 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 1
+2025-06-13 22:34:45,196 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no missing logic from the Oracle View. The generated Snowflake view uses the same SELECT statement as the original Oracle view, with some minor syntax changes to ...
+2025-06-13 22:34:45,198 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-13 22:34:45,199 - src.core.agent_workflow - INFO - Stopping optimization. Max cycles reached or no further optimization needed. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-13 22:34:45,202 - src.core.agent_workflow - INFO - Executing validation_node for View
+2025-06-13 22:34:45,203 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for View.
+2025-06-13 22:34:45,203 - src.core.agent_workflow - WARNING - Simulated validation found errors for View: View missing expected 'CREATE OR REPLACE VIEW' or 'AS SELECT' structure., Oracle (+) outer join syntax detected in view. Please ensure it's converted to ANSI JOINs.
+2025-06-13 22:34:45,203 - src.core.agent_workflow - WARNING - Snowflake View code failed syntax validation.
+2025-06-13 22:34:45,205 - __main__ - INFO - Migration successful for View manual_input.sql
+2025-06-13 23:02:46,276 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 23:05:25,432 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 23:05:26,240 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 23:05:29,301 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 23:05:37,099 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-13 23:05:37,108 - __main__ - INFO - Migration initiated for 1 Oracle Procedure(s) using LLM: ollama-codellama
+2025-06-13 23:05:37,112 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-13 23:05:37,112 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for Procedure.
+2025-06-13 23:05:37,118 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for Procedure.
+2025-06-13 23:05:37,120 - src.core.agent_workflow - INFO - Executing initial_analysis_node for Procedure
+2025-06-13 23:06:01,653 - src.core.agent_workflow - INFO - Initial Analysis: 
+The purpose of this procedure is to retrieve the details of an employee based on their ID, update the last access date for that employee in the employees table, and return the employee's name and sal...
+2025-06-13 23:06:01,659 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for Procedure
+2025-06-13 23:06:05,362 - src.core.agent_workflow - INFO - LLM thinking for RAG (not fetching from DB): 
+* Data types
+* Control flow
+* SQL dialect differences
+* Dynamic SQL
+* Oracle-specific functions/syn...
+2025-06-13 23:06:05,363 - src.core.agent_workflow - INFO - RAG Context (user-provided samples and guidelines) prepared.
+2025-06-13 23:06:05,364 - src.core.agent_workflow - INFO - Object is not a large view or is a procedure. Branching to direct generation.
+2025-06-13 23:06:05,365 - src.core.agent_workflow - INFO - Executing code_generation_node for Procedure
+2025-06-13 23:06:05,366 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-13 23:06:25,637 - src.core.agent_workflow - INFO - Initial Snowflake Procedure code generated.
+2025-06-13 23:06:25,638 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-13 23:06:25,640 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for Procedure
+2025-06-13 23:06:25,641 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 1
+2025-06-13 23:06:33,268 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No logic is missed from the Oracle Procedure. The generated Snowflake code is functionally equivalent to the original procedure.
+2. Snowflake Optimization: The generated Snowf...
+2025-06-13 23:06:33,268 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-13 23:06:33,269 - src.core.agent_workflow - INFO - Stopping optimization. Max cycles reached or no further optimization needed. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Executing validation_node for Procedure
+2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for Procedure.
+2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Simulated validation passed for Procedure.
+2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Snowflake Procedure code passed syntax validation.
+2025-06-13 23:06:33,273 - __main__ - INFO - Migration successful for Procedure manual_input.sql

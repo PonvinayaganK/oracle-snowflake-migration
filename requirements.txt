@@ -1,0 +1,37 @@
+# requirements.txt
+
+# Streamlit UI
+streamlit>=1.30.0
+
+# LangChain and LangGraph core components
+langchain>=0.2.0
+langgraph>=0.0.60
+langchain-community>=0.2.0 # Includes support for various LLMs (e.g., Ollama, HuggingFace models) and components
+
+# LLM Providers
+openai>=1.0.0
+anthropic>=0.23.0 # Only if using Claude
+ollama # Direct Ollama client, useful if not solely relying on langchain-community wrapper
+
+# FastAPI API
+fastapi~=0.115.9
+uvicorn[standard] # uvicorn with 'standard' extras like httptools and watchfiles
+
+# Utilities
+python-dotenv>=1.0.0
+
+# Optional database connectors (uncomment and install only if you configure direct DB connections)
+# cx_Oracle>=8.0.0 # For connecting to Oracle databases
+# snowflake-connector-python>=3.0.0 # For connecting to Snowflake
+pillow~=11.2.1
+pydantic~=2.11.5
+langchain-core~=0.3.64
+rank-bm25~=0.2.2
+langchain-openai~=0.3.21
+langchain-anthropic~=0.3.15
+
+# Advanced RAG System (Re-enabled)
+chromadb>=0.4.24 # Ensure a recent version for local persistence
+#langchain-chroma>=0.3.0 # For LangChain's ChromaDB integration
+sentence-transformers>=2.3.0 # For local embedding models
+rank_bm25 # For keyword search (BM25 algorithm)
