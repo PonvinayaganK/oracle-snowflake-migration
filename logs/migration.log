@@ -1525,3 +1525,119 @@ The purpose of this procedure is to retrieve the details of an employee based on
 2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Simulated validation passed for Procedure.
 2025-06-13 23:06:33,271 - src.core.agent_workflow - INFO - Snowflake Procedure code passed syntax validation.
 2025-06-13 23:06:33,273 - __main__ - INFO - Migration successful for Procedure manual_input.sql
+2025-06-14 20:25:54,737 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 20:25:57,860 - __main__ - ERROR - Error generating workflow visualization: LLMFactory() takes no arguments
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/ui/app.py", line 239, in main
+    dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: LLMFactory() takes no arguments
+2025-06-14 20:28:20,920 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 20:29:04,185 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 20:29:04,223 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-14 20:29:04,682 - src.rag.vector_store - INFO - Initialized ChromaDB client at: data/vector_store
+2025-06-14 20:29:04,683 - src.rag.vector_store - INFO - Accessed/Created ChromaDB collection: snowflake_migration_examples
+2025-06-14 20:29:04,683 - src.llm.llm_factory - INFO - Attempting to load embedding model: local-all-MiniLM-L6-v2
+2025-06-14 20:29:04,683 - src.llm.llm_factory - ERROR - Failed to load embedding model 'local-all-MiniLM-L6-v2'.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/llm/llm_factory.py", line 146, in get_embedding_model
+    raise ConfigurationError(
+src.utils.exceptions.ConfigurationError: Local embedding model 'all-MiniLM-L6-v2' not found at 'data/embedding_models/all-MiniLM-L6-v2'. Please ensure it's manually downloaded and placed there. Instructions: https://www.sbert.net/docs/usage/semantic_textual_similarity.html#download-models
+2025-06-14 20:29:04,684 - __main__ - ERROR - Error ingesting samples via UI: Embedding model loading failed: Local embedding model 'all-MiniLM-L6-v2' not found at 'data/embedding_models/all-MiniLM-L6-v2'. Please ensure it's manually downloaded and placed there. Instructions: https://www.sbert.net/docs/usage/semantic_textual_similarity.html#download-models. Check configuration and local path/gateway.
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/llm/llm_factory.py", line 146, in get_embedding_model
+    raise ConfigurationError(
+src.utils.exceptions.ConfigurationError: Local embedding model 'all-MiniLM-L6-v2' not found at 'data/embedding_models/all-MiniLM-L6-v2'. Please ensure it's manually downloaded and placed there. Instructions: https://www.sbert.net/docs/usage/semantic_textual_similarity.html#download-models
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/ui/app.py", line 285, in main
+    chroma_manager.add_documents([guidelines_doc])
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/rag/vector_store.py", line 88, in add_documents
+    embedding_model = self._get_embedding_model_instance()
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/rag/vector_store.py", line 43, in _get_embedding_model_instance
+    self._embedding_model = EmbeddingFactory.get_embedding_model(EMBEDDING_MODEL_NAME)
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/ponvin/PycharmProjects/GitHub/oracle-snowflake-migration/src/llm/llm_factory.py", line 167, in get_embedding_model
+    raise RAGError(f"Embedding model loading failed: {e}. Check configuration and local path/gateway.")
+src.utils.exceptions.RAGError: Embedding model loading failed: Local embedding model 'all-MiniLM-L6-v2' not found at 'data/embedding_models/all-MiniLM-L6-v2'. Please ensure it's manually downloaded and placed there. Instructions: https://www.sbert.net/docs/usage/semantic_textual_similarity.html#download-models. Check configuration and local path/gateway.
+2025-06-14 23:07:15,451 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 23:07:15,469 - __main__ - INFO - Migration initiated for 1 Oracle Procedure(s) using LLM: ollama-codellama and Embedding: local-all-MiniLM-L6-v2
+2025-06-14 23:14:49,589 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 23:14:53,458 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 23:15:00,795 - src.utils.logger - INFO - Logging initialized. Log level: INFO
+2025-06-14 23:15:00,803 - __main__ - INFO - Migration initiated for 1 Oracle View(s) using LLM: ollama-codellama and Embedding: local-all-MiniLM-L6-v2
+2025-06-14 23:15:00,807 - src.llm_config.llm_manager - INFO - Initialized Ollama model: codellama at http://localhost:11434
+2025-06-14 23:15:00,807 - src.core.agent_workflow - INFO - Compiling LangGraph migration workflow for View.
+2025-06-14 23:15:00,813 - src.core.agent_workflow - INFO - LangGraph migration workflow compiled successfully for View.
+2025-06-14 23:15:00,815 - src.core.agent_workflow - INFO - Executing initial_analysis_node for View
+2025-06-14 23:15:16,719 - src.core.agent_workflow - INFO - Initial Analysis: 
+The Oracle View `MY_SCHEMA.EMPLOYEE_SALARY_VW` is a complex view that combines data from two tables, `employees` and `departments`, to display employee salaries and their corresponding department nam...
+2025-06-14 23:15:16,727 - src.core.agent_workflow - INFO - Executing rag_retrieval_node for View
+2025-06-14 23:15:19,080 - src.core.agent_workflow - INFO - LLM generated RAG query: 
+* `NO_MERGE` hint
+* `ROWNUM` pseudocolumn
+* `AVG()` function
+* `READ ONLY` keyword
+* Cursor
+* Dynam...
+2025-06-14 23:15:19,080 - src.rag.retriever - INFO - Performing semantic search for query: '
+* `NO_MERGE` hint
+* `ROWNUM` pseudocolumn
+* `AVG(...' (k=5)
+2025-06-14 23:15:19,107 - chromadb.telemetry.product.posthog - INFO - Anonymized telemetry enabled. See                     https://docs.trychroma.com/telemetry for more information.
+2025-06-14 23:15:19,178 - src.rag.vector_store - INFO - Initialized ChromaDB client at: data/vector_store
+2025-06-14 23:15:19,180 - src.rag.vector_store - INFO - Accessed/Created ChromaDB collection: snowflake_migration_examples
+2025-06-14 23:15:19,180 - src.llm_config.llm_manager - INFO - Attempting to load embedding model: local-all-MiniLM-L6-v2
+2025-06-14 23:15:22,148 - sentence_transformers.SentenceTransformer - INFO - Use pytorch device_name: mps
+2025-06-14 23:15:22,148 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: data/embedding_models/all-MiniLM-L6-v2
+2025-06-14 23:15:22,619 - src.llm_config.llm_manager - INFO - Successfully loaded embedding model: local-all-MiniLM-L6-v2
+2025-06-14 23:15:24,177 - src.rag.vector_store - INFO - Retrieved 0 documents from ChromaDB for query.
+2025-06-14 23:15:24,177 - src.rag.retriever - INFO - Performing keyword search for query: '
+* `NO_MERGE` hint
+* `ROWNUM` pseudocolumn
+* `AVG(...' (k=5)
+2025-06-14 23:15:24,177 - src.rag.retriever - INFO - Initializing BM25 retriever...
+2025-06-14 23:15:24,178 - src.rag.retriever - WARNING - No documents found in ChromaDB collection for BM25 initialization.
+2025-06-14 23:15:24,178 - src.rag.retriever - WARNING - BM25 retriever not initialized. Skipping keyword search.
+2025-06-14 23:15:24,178 - src.rag.retriever - INFO - Applied RRF to fuse results. Total fused: 0
+2025-06-14 23:15:24,178 - src.rag.retriever - INFO - Hybrid retrieval completed, returning 0 documents.
+2025-06-14 23:15:24,178 - src.core.agent_workflow - INFO - RAG Context Retrieved. 0 documents from vector store.
+2025-06-14 23:15:24,178 - src.core.agent_workflow - INFO - Object is not a large view or is a procedure. Branching to direct generation.
+2025-06-14 23:15:24,180 - src.core.agent_workflow - INFO - Executing code_generation_node for View
+2025-06-14 23:15:24,180 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-14 23:15:44,288 - src.core.agent_workflow - INFO - Initial Snowflake View code generated.
+2025-06-14 23:15:44,290 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-14 23:15:44,293 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for View
+2025-06-14 23:15:44,293 - src.core.agent_workflow - INFO - Starting optimization cycle 1 / 3
+2025-06-14 23:15:57,291 - src.core.agent_workflow - INFO - Reflection:  1. Logical Equivalence: No, there is no logic missed from the Oracle View. The generated Snowflake code is functionally equivalent to the original Oracle view, but with some minor changes to improve ...
+2025-06-14 23:15:57,292 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 1 cycles.
+2025-06-14 23:15:57,293 - src.core.agent_workflow - INFO - Continuing optimization: Cycle 1/3. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-14 23:15:57,295 - src.core.agent_workflow - INFO - Executing code_generation_node for View
+2025-06-14 23:15:57,296 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-14 23:16:12,145 - src.core.agent_workflow - INFO - Initial Snowflake View code generated.
+2025-06-14 23:16:12,146 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-14 23:16:12,149 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for View
+2025-06-14 23:16:12,150 - src.core.agent_workflow - INFO - Starting optimization cycle 2 / 3
+2025-06-14 23:16:21,131 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No logic is missed from the Oracle View. The generated Snowflake view is functionally equivalent to the original Oracle view.
+2. Snowflake Optimization: Yes, the code is optim...
+2025-06-14 23:16:21,132 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 2 cycles.
+2025-06-14 23:16:21,132 - src.core.agent_workflow - INFO - Continuing optimization: Cycle 2/3. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-14 23:16:21,134 - src.core.agent_workflow - INFO - Executing code_generation_node for View
+2025-06-14 23:16:21,134 - src.core.agent_workflow - INFO - Generating code for full object or non-view object.
+2025-06-14 23:16:36,068 - src.core.agent_workflow - INFO - Initial Snowflake View code generated.
+2025-06-14 23:16:36,069 - src.core.agent_workflow - INFO - Not a decomposed view, skipping assembly.
+2025-06-14 23:16:36,074 - src.core.agent_workflow - INFO - Executing optimization_and_reflection_node for View
+2025-06-14 23:16:36,075 - src.core.agent_workflow - INFO - Starting optimization cycle 3 / 3
+2025-06-14 23:16:47,767 - src.core.agent_workflow - INFO - Reflection: 
+1. Logical Equivalence: No, there is no missing logic from the original Oracle view. The generated Snowflake code is functionally equivalent to the original view, but with some minor syntax changes a...
+2025-06-14 23:16:47,767 - src.core.agent_workflow - WARNING - LLM identified areas for further optimization after 3 cycles.
+2025-06-14 23:16:47,768 - src.core.agent_workflow - INFO - Stopping optimization. Max cycles reached or no further optimization needed. Errors/needs: ['Further optimization/correction needed based on reflection.']
+2025-06-14 23:16:47,770 - src.core.agent_workflow - INFO - Executing validation_node for View
+2025-06-14 23:16:47,770 - src.core.agent_workflow - INFO - Performing simulated Snowflake syntax validation for View.
+2025-06-14 23:16:47,770 - src.core.agent_workflow - WARNING - Simulated validation found errors for View: View missing expected 'CREATE OR REPLACE VIEW' or 'AS SELECT' structure., Oracle ROWNUM pseudocolumn detected in view. Should be converted to ROW_NUMBER().
+2025-06-14 23:16:47,770 - src.core.agent_workflow - WARNING - Snowflake View code failed syntax validation.
+2025-06-14 23:16:47,772 - __main__ - INFO - Migration successful for View manual_input.sql

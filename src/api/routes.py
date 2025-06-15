@@ -3,12 +3,14 @@ from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import JSONResponse
 import logging
 import uuid
+from typing import List
 
 from src.api.schemas import MigrationRequest, MigrationResponse
 from src.core.agent_workflow import compile_migration_graph, AgentState
-from src.llm_config.llm_manager import LLMManager # Renamed from llm_manager.py to llm_factory.py conceptually
+from src.llm_config.llm_manager import LLMManager # Use LLMFactory
 from src.utils.exceptions import MigrationError, InvalidInputError, ConfigurationError, LLMError, RAGError
 from src.config import SUPPORTED_LLM_MODELS, MAX_OPTIMIZATION_CYCLES, SUPPORTED_OBJECT_TYPES
+from langchain_core.documents import Document # Import Document for sample_snowflake_code
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -34,23 +36,26 @@ async def migrate_object(request: Request, migration_req: MigrationRequest):
         logger.error(f"[{request_id}] InvalidInputError: Unsupported LLM model: {migration_req.llm_model}")
         raise HTTPException(status_code=400, detail=f"Unsupported LLM model. Must be one of: {SUPPORTED_LLM_MODELS}")
 
-    llm_manager = LLMManager(migration_req.llm_model)
+    llm_factory = LLMManager(migration_req.llm_model) # Use LLMFactory
     try:
-        llm_instance = llm_manager.get_llm()
+        llm_instance = llm_factory.get_llm()
         # Compile the graph for the specific object type
         compiled_graph = compile_migration_graph(llm_instance, migration_req.object_type)
 
         initial_state: AgentState = {
             "oracle_object_code": migration_req.oracle_code,
             "snowflake_guidelines": migration_req.guidelines if migration_req.guidelines else "",
-            "sample_snowflake_code": "", # This will be populated by RAG
+            "sample_snowflake_code": [], # This will be populated by RAG from vector store
             "generated_snowflake_code": "",
             "reflection": "",
             "errors": [],
             "current_step": "Start",
             "optimization_cycle_count": 0,
             "max_optimization_cycles": migration_req.optimization_cycles if migration_req.optimization_cycles > 0 else MAX_OPTIMIZATION_CYCLES,
-            "object_type": migration_req.object_type
+            "object_type": migration_req.object_type,
+            "decomposed_oracle_view_parts": {},
+            "translated_snowflake_view_parts": {},
+            "is_decomposed": False
         }
 
         # Run the LangGraph workflow
@@ -77,7 +82,7 @@ async def migrate_object(request: Request, migration_req: MigrationRequest):
     except (InvalidInputError, ConfigurationError) as e:
         logger.error(f"[{request_id}] Configuration/Input Error: {e}", exc_info=True)
         raise HTTPException(status_code=400, detail=str(e))
-    except (LLMError, RAGError, MigrationError) as e:
+    except (LLMError, RAGError, MigrationError) as e: # APIError removed
         logger.error(f"[{request_id}] Migration specific error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Migration process failed: {e}")
     except Exception as e:

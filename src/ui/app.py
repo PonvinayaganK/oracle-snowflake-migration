@@ -15,13 +15,14 @@ logger = logging.getLogger(__name__)
 
 from src.core.agent_workflow import compile_migration_graph
 from src.data_processing.file_utils import save_uploaded_file, read_file_content
-from src.llm_config.llm_manager import LLMManager  # Use LLMFactory for consistency
+from src.llm_config.llm_manager import LLMManager  # Use LLMFactory
 from src.utils.exceptions import MigrationError, InvalidInputError
 # Import settings from src.config.settings
 from src.config import (
     SUPPORTED_LLM_MODELS, DEFAULT_LLM_MODEL, PROXY_CONFIG, OLLAMA_BASE_URL,
-    MAX_OPTIMIZATION_CYCLES, SUPPORTED_OBJECT_TYPES, DEFAULT_OBJECT_TYPE,
-    VIEW_DECOMPOSITION_THRESHOLD
+    MAX_OPTIMIZATION_CYCLES, SUPPORTED_OBJECT_TYPES, DEFAULT_OBJECT_TYPE, VIEW_DECOMPOSITION_THRESHOLD,
+    SUPPORTED_EMBEDDING_MODELS, DEFAULT_EMBEDDING_MODEL, GATEWAY_EMBEDDING_URL,
+    GATEWAY_EMBEDDING_API_KEY  # RAG/Embedding settings
 )
 
 st.set_page_config(layout="wide", page_title="Oracle to Snowflake Migrator")
@@ -59,6 +60,36 @@ def main():
         if ollama_url_input != current_ollama_url:
             os.environ['OLLAMA_BASE_URL'] = ollama_url_input
             st.sidebar.info(f"Ollama Base URL set to: {ollama_url_input}. Restart application if issues persist.")
+
+    # --- Embedding Model Selection ---
+    st.sidebar.subheader("Embedding Model Selection")
+    selected_embedding_model = st.sidebar.selectbox(
+        "Choose an Embedding Model:",
+        options=SUPPORTED_EMBEDDING_MODELS,
+        index=SUPPORTED_EMBEDDING_MODELS.index(
+            DEFAULT_EMBEDDING_MODEL) if DEFAULT_EMBEDDING_MODEL in SUPPORTED_EMBEDDING_MODELS else 0,
+        key="embedding_model_selector"
+    )
+    # Conditionally display inputs for custom gateway embedding model
+    if selected_embedding_model == "company-embedding-gateway":
+        st.sidebar.info("Configure your company's LLM gateway for embeddings.")
+        gateway_url_input = st.sidebar.text_input(
+            "Gateway Embedding URL:",
+            value=os.getenv("GATEWAY_EMBEDDING_URL", GATEWAY_EMBEDDING_URL),
+            key="gateway_embedding_url_input"
+        )
+        gateway_api_key_input = st.sidebar.text_input(
+            "Gateway API Key (optional):",
+            type="password",
+            value=os.getenv("GATEWAY_EMBEDDING_API_KEY", GATEWAY_EMBEDDING_API_KEY),
+            key="gateway_embedding_api_key_input"
+        )
+        # Update environment variables for the EmbeddingFactory to pick up
+        os.environ['GATEWAY_EMBEDDING_URL'] = gateway_url_input
+        if gateway_api_key_input:
+            os.environ['GATEWAY_EMBEDDING_API_KEY'] = gateway_api_key_input
+        else:  # Clear if input is empty
+            if 'GATEWAY_EMBEDDING_API_KEY' in os.environ: del os.environ['GATEWAY_EMBEDDING_API_KEY']
 
     # Optimization Cycles Input
     st.sidebar.subheader("Optimization Settings")
@@ -210,54 +241,94 @@ def main():
         st.text_area("Review/Edit Guidelines:", value=guidelines_content, height=200, key="guidelines_editor")
 
         st.subheader(f"Snowflake Sample {selected_object_type}s (RAG input)")
-        sample_file_path = "data/sample_snowflake_procedures.txt" if selected_object_type == "Procedure" else "data/sample_snowflake_views.txt"
+        # Note: This is *not* used directly in the LLM prompt anymore.
+        # It's intended to be ingested into the vector store.
+        # So, the UI here is just for providing the *content* for ingest.
+        sample_file_path_default = "data/sample_snowflake_procedures.txt" if selected_object_type == "Procedure" else "data/sample_snowflake_views.txt"
 
         uploaded_samples = st.file_uploader(
-            f"Upload a text file with sample Snowflake {selected_object_type}s (RAG input)",
+            f"Upload a text file with sample Snowflake {selected_object_type}s (RAG input for vector store)",
             type=["txt"],
-            accept_multiple_files=False,  # Reverted to single file as no vector store
+            accept_multiple_files=False,
             key="samples_uploader"
         )
-        sample_procedures_content = ""  # This will actually store sample DDL for both procs and views
+        sample_procedures_content = ""  # This will actually store sample DDL for both procs and views for ingestion
         if uploaded_samples:
             samples_path = save_uploaded_file(uploaded_samples, "samples")
             sample_procedures_content = read_file_content(samples_path)
             st.success(f"Sample Snowflake {selected_object_type}s file uploaded.")
         else:
-            st.info(f"No sample {selected_object_type}s uploaded. Using default example for {selected_object_type}s.")
-            sample_procedures_content = read_file_content(sample_file_path)
-        st.text_area(f"Review/Edit Sample {selected_object_type}s:", value=sample_procedures_content, height=200,
-                     key="samples_editor")
+            st.info(
+                f"No sample {selected_object_type}s uploaded. Using default example for {selected_object_type}s for ingestion.")
+            sample_procedures_content = read_file_content(sample_file_path_default)
+        # Display the content, but the actual ingestion into vector store happens via the script/API
+        st.text_area(f"Review/Edit Sample {selected_object_type}s (for ingestion):", value=sample_procedures_content,
+                     height=200, key="samples_editor")
+
+        # Add a button to ingest user-provided samples into ChromaDB
+        if st.button(f"Ingest {selected_object_type} Samples into RAG DB", key="ingest_button"):
+            try:
+                # Dynamically set the EMBEDDING_MODEL_NAME environment variable
+                # so EmbeddingFactory picks it up when initialized within the ingestion process
+                os.environ['EMBEDDING_MODEL_NAME'] = selected_embedding_model
+
+                # This should ideally call a function from scripts/ingest_rag_data.py
+                # For simplicity here, we'll mimic what ingest_rag_data.py does for *this specific sample*
+                from src.rag.vector_store import ChromaDBManager
+                from src.rag.document_loader import prepare_migration_pair_document, load_text_file
+
+                chroma_manager = ChromaDBManager()  # This will use the dynamically set EMBEDDING_MODEL_NAME
+
+                # Ingest guidelines
+                guidelines_doc = load_text_file("data/guidelines.txt",
+                                                metadata={"type": "guidelines", "source": "user_provided_guidelines"})
+                chroma_manager.add_documents([guidelines_doc])
+
+                # Ingest the currently displayed sample code content
+                if sample_procedures_content.strip():
+                    sample_doc = prepare_migration_pair_document(
+                        oracle_code="",  # No Oracle for just sample code, just Snowflake
+                        snowflake_code=sample_procedures_content,
+                        object_type=selected_object_type,
+                        source_name=f"ui_uploaded_sample_{selected_object_type}"
+                    )
+                    chroma_manager.add_documents([sample_doc])
+                    st.success(
+                        f"Successfully ingested current {selected_object_type} samples and guidelines into RAG database.")
+                    logger.info(f"User ingested {selected_object_type} samples via UI.")
+                else:
+                    st.warning("No sample content to ingest.")
+
+            except Exception as e:
+                st.error(f"Error ingesting samples into RAG DB: {e}")
+                logger.error(f"Error ingesting samples via UI: {e}", exc_info=True)
 
     st.markdown("---")
 
-    # --- Workflow Visualization Section ---
+    # # --- Workflow Visualization Section ---
     # st.header("LangGraph Workflow Visualization")
     # st.info("This visualization shows the state transitions of the AI agent.")
     # try:
     #     # Use a dummy LLM and a default object type for visualization, as it's static
-    #     dummy_llm = LLMManager(DEFAULT_LLM_MODEL).get_llm()
-    #     compiled_graph_viz = compile_migration_graph(dummy_llm,
-    #                                                  DEFAULT_OBJECT_TYPE)  # Pass a default object_type for graph structure
-    #
+    #     dummy_llm = LLMFactory(DEFAULT_LLM_MODEL).get_llm()
+    #     compiled_graph_viz = compile_migration_graph(dummy_llm, DEFAULT_OBJECT_TYPE) # Pass a default object_type for graph structure
+
     #     # Get the underlying graph object
     #     graph_to_draw = compiled_graph_viz.get_graph()
-    #
+
     #     # Draw to a BytesIO object
     #     graph_bytes = graph_to_draw.draw_png()
-    #
+
     #     # Display the image
     #     st.image(Image.open(io.BytesIO(graph_bytes)), caption="LangGraph Agent Workflow", use_column_width=True)
-    #
+
     # except FileNotFoundError:
-    #     st.warning(
-    #         "Graphviz not found. Please install Graphviz system-wide to view the workflow visualization. (e.g., `sudo apt-get install graphviz` on Linux, or download from graphviz.org for Windows/macOS)")
+    #     st.warning("Graphviz not found. Please install Graphviz system-wide to view the workflow visualization. (e.g., `sudo apt-get install graphviz` on Linux, or download from graphviz.org for Windows/macOS)")
     #     logger.warning("Graphviz system installation not found for drawing workflow.")
     # except Exception as e:
-    #     st.error(
-    #         f"Could not generate workflow visualization: {e}. Ensure 'pydot' and 'graphviz' Python packages are installed, and Graphviz is installed on your system.")
+    #     st.error(f"Could not generate workflow visualization: {e}. Ensure 'pydot' and 'graphviz' Python packages are installed, and Graphviz is installed on your system.")
     #     logger.error(f"Error generating workflow visualization: {e}", exc_info=True)
-    #
+
     # st.markdown("---")
 
     # --- Run Migration Button ---
@@ -268,13 +339,17 @@ def main():
             logger.error(f"No Oracle {selected_object_type} DDL provided for migration.")
             return
 
+        # Dynamically set the EMBEDDING_MODEL_NAME environment variable
+        # so EmbeddingFactory picks it up when initialized within the workflow
+        os.environ['EMBEDDING_MODEL_NAME'] = selected_embedding_model
+
         st.info(f"Migration process started for {selected_object_type}(s). This may take a few moments...")
         logger.info(
-            f"Migration initiated for {len(oracle_code_inputs)} Oracle {selected_object_type}(s) using LLM: {selected_llm_model}")
+            f"Migration initiated for {len(oracle_code_inputs)} Oracle {selected_object_type}(s) using LLM: {selected_llm_model} and Embedding: {selected_embedding_model}")
 
-        llm_manager = LLMManager(selected_llm_model)
+        llm_factory = LLMManager(selected_llm_model)  # Use LLMFactory
         try:
-            llm_instance = llm_manager.get_llm()
+            llm_instance = llm_factory.get_llm()
             # Pass object_type to compile_migration_graph
             compiled_graph = compile_migration_graph(llm_instance, selected_object_type)
 
@@ -288,7 +363,7 @@ def main():
                 initial_state = {
                     "oracle_object_code": oracle_code,
                     "snowflake_guidelines": guidelines_content,
-                    "sample_snowflake_code": sample_procedures_content,  # Direct string from UI
+                    "sample_snowflake_code": [],  # This will be filled by RAG from vector store now
                     "generated_snowflake_code": "",
                     "reflection": "",
                     "errors": [],
@@ -298,7 +373,7 @@ def main():
                     "object_type": selected_object_type,
                     "decomposed_oracle_view_parts": {},  # Initialize
                     "translated_snowflake_view_parts": {},  # Initialize
-                    "is_decomposed": False  # Initialize
+                    "is_decomposed": False
                 }
 
                 # Approximate total steps adjusted for decomposition
