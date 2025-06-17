@@ -98,11 +98,6 @@ DEFAULT_EMBEDDING_MODEL = "local-all-MiniLM-L6-v2" # Recommended default for loc
 EMBEDDING_MODEL_NAME = os.getenv("EMBEDDING_MODEL_NAME", DEFAULT_EMBEDDING_MODEL)
 LOCAL_EMBEDDING_MODEL_PATH = os.getenv("LOCAL_EMBEDDING_MODEL_PATH", "data/embedding_models") # Path to pre-downloaded models
 
-# Company Gateway Embedding Model
-GATEWAY_EMBEDDING_URL = os.getenv("GATEWAY_EMBEDDING_URL", "http://localhost:your_gateway_port/embed")
-GATEWAY_EMBEDDING_API_KEY = os.getenv("GATEWAY_EMBEDDING_API_KEY") # Or other auth token
-
-
 # --- ChromaDB Configuration ---
 CHROMA_DB_PATH = os.getenv("CHROMA_DB_PATH", "data/vector_store")
 CHROMA_COLLECTION_NAME = os.getenv("CHROMA_COLLECTION_NAME", "snowflake_migration_examples")

@@ -11,7 +11,7 @@ from langchain_community.embeddings import OpenAIEmbeddings, SentenceTransformer
 from langchain_core.embeddings import Embeddings  # Base class for custom embeddings
 from src.config import (
     OPENAI_API_KEY, ANTHROPIC_API_KEY, OLLAMA_BASE_URL,
-    EMBEDDING_MODEL_NAME, GATEWAY_EMBEDDING_URL, GATEWAY_EMBEDDING_API_KEY, LOCAL_EMBEDDING_MODEL_PATH
+    EMBEDDING_MODEL_NAME, GATEWAY_EMBEDDING_URL, LOCAL_EMBEDDING_MODEL_PATH
 )
 from src.utils.exceptions import ConfigurationError, LLMError, RAGError  # APIError removed
 
@@ -67,15 +67,14 @@ class CustomGatewayEmbeddings(Embeddings):
 
     def _call_gateway_api(self, texts: List[str]) -> List[List[float]]:
         headers = {"Content-Type": "application/json"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
-
         payload = {"input": texts}  # Adjust payload format based on your gateway's API spec
 
         try:
             # No explicit timeout parameter in requests.post in this version, relies on global/system defaults
             response = requests.post(self.url, headers=headers, json=payload)
             response.raise_for_status()  # Raise HTTPError for bad responses (4xx or 5xx)
+            # If SDK needs an API key or URL, it should be passed here or configured globally by SDK
+            # Example: return self.sdk_client.embed(texts)
 
             data = response.json()
             # Adjust extraction based on your gateway's response structure
@@ -141,8 +140,7 @@ class EmbeddingFactory:
                 if not GATEWAY_EMBEDDING_URL:
                     raise ConfigurationError("GATEWAY_EMBEDDING_URL not set for company embedding gateway.")
                 EmbeddingFactory._embedding_model_instance = CustomGatewayEmbeddings(
-                    url=GATEWAY_EMBEDDING_URL,
-                    api_key=GATEWAY_EMBEDDING_API_KEY
+                    url=GATEWAY_EMBEDDING_URL
                 )
             else:
                 raise ConfigurationError(f"Unsupported or misconfigured embedding model: {model_name}. "

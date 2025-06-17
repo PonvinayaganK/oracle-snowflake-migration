@@ -7,7 +7,7 @@ from typing import List
 
 from src.api.schemas import MigrationRequest, MigrationResponse
 from src.core.agent_workflow import compile_migration_graph, AgentState
-from src.llm_config.llm_manager import LLMManager # Use LLMFactory
+from src.llm.llm_factory import LLMFactory # Use LLMFactory
 from src.utils.exceptions import MigrationError, InvalidInputError, ConfigurationError, LLMError, RAGError
 from src.config import SUPPORTED_LLM_MODELS, MAX_OPTIMIZATION_CYCLES, SUPPORTED_OBJECT_TYPES
 from langchain_core.documents import Document # Import Document for sample_snowflake_code
@@ -36,7 +36,7 @@ async def migrate_object(request: Request, migration_req: MigrationRequest):
         logger.error(f"[{request_id}] InvalidInputError: Unsupported LLM model: {migration_req.llm_model}")
         raise HTTPException(status_code=400, detail=f"Unsupported LLM model. Must be one of: {SUPPORTED_LLM_MODELS}")
 
-    llm_factory = LLMManager(migration_req.llm_model) # Use LLMFactory
+    llm_factory = LLMFactory(migration_req.llm_model) # Use LLMFactory
     try:
         llm_instance = llm_factory.get_llm()
         # Compile the graph for the specific object type

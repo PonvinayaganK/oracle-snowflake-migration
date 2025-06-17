@@ -16,7 +16,7 @@ from src.core.prompts import (
 )
 from src.rag.retriever import HybridRetriever # Import HybridRetriever
 
-from src.utils.exceptions import LLMError, RAGError, ConfigurationError # ConfigurationError added
+from src.utils.exceptions import LLMError, RAGError, ConfigurationError
 from src.config import VIEW_DECOMPOSITION_THRESHOLD # Import the threshold
 
 logger = logging.getLogger(__name__)
@@ -89,7 +89,6 @@ def validate_snowflake_syntax(snowflake_code: str, object_type: str) -> bool: # 
     return is_valid
 
 # --- Graph Nodes ---
-# Removed @retry_llm_call() decorator as per request
 def initial_analysis_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing initial_analysis_node for {state['object_type']}")
     logger.debug(f"initial_analysis_node received config: {config}")
@@ -110,7 +109,6 @@ def initial_analysis_node(state: AgentState, config: RunnableConfig) -> AgentSta
         logger.error(f"Error in initial_analysis_node: {e}", exc_info=True)
         raise LLMError(f"LLM failed during initial analysis: {e}")
 
-# Removed @retry_llm_call() decorator as per request
 def rag_retrieval_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing rag_retrieval_node for {state['object_type']}")
     logger.debug(f"rag_retrieval_node received config: {config}")
@@ -145,7 +143,6 @@ def rag_retrieval_node(state: AgentState, config: RunnableConfig) -> AgentState:
         logger.error(f"Error in rag_retrieval_node: {e}", exc_info=True)
         raise LLMError(f"Failed during RAG context preparation: {e}")
 
-# Removed @retry_llm_call() decorator as per request
 def view_decomposition_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing view_decomposition_node for {state['object_type']}")
     logger.debug(f"view_decomposition_node received config: {config}")
@@ -184,7 +181,6 @@ def view_decomposition_node(state: AgentState, config: RunnableConfig) -> AgentS
 
     return state
 
-# Removed @retry_llm_call() decorator as per request
 def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing code_generation_node for {state['object_type']}")
     logger.debug(f"code_generation_node received config: {config}")
@@ -196,7 +192,6 @@ def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentStat
             f"{doc.page_content}"
             for doc in state['sample_snowflake_code']
         ])
-
         if state['is_decomposed'] and state['object_type'] == "View":
             logger.info("Translating decomposed view parts.")
             for part_name, oracle_sql_part in state['decomposed_oracle_view_parts'].items():
@@ -241,7 +236,6 @@ def code_generation_node(state: AgentState, config: RunnableConfig) -> AgentStat
         logger.error(f"Error in code_generation_node: {e}", exc_info=True)
         raise LLMError(f"LLM failed during code generation: {e}")
 
-# Removed @retry_llm_call() decorator as per request
 def view_assembly_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing view_assembly_node for {state['object_type']}")
     logger.debug(f"view_assembly_node received config: {config}")
@@ -270,7 +264,6 @@ def view_assembly_node(state: AgentState, config: RunnableConfig) -> AgentState:
 
     return state
 
-# Removed @retry_llm_call() decorator as per request
 def optimization_and_reflection_node(state: AgentState, config: RunnableConfig) -> AgentState:
     logger.info(f"Executing optimization_and_reflection_node for {state['object_type']}")
     logger.debug(f"optimization_and_reflection_node received config: {config}")
@@ -286,7 +279,7 @@ def optimization_and_reflection_node(state: AgentState, config: RunnableConfig) 
             f"{doc.page_content}"
             for doc in state['sample_snowflake_code']
         ])
-        reflection_prompt = OPTIMIZATION_REFLECTION_PROMPT_TEMPLATE.invoke({ # This prompt uses the raw strings now
+        reflection_prompt = OPTIMIZATION_REFLECTION_PROMPT_TEMPLATE.invoke({
             "original_oracle_object_code": state['oracle_object_code'],
             "generated_snowflake_code": state['generated_snowflake_code'],
             "snowflake_guidelines": state['snowflake_guidelines'],

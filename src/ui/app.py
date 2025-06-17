@@ -15,14 +15,13 @@ logger = logging.getLogger(__name__)
 
 from src.core.agent_workflow import compile_migration_graph
 from src.data_processing.file_utils import save_uploaded_file, read_file_content
-from src.llm_config.llm_manager import LLMManager  # Use LLMFactory
+from src.llm.llm_factory import LLMFactory  # Use LLMFactory
 from src.utils.exceptions import MigrationError, InvalidInputError
 # Import settings from src.config.settings
 from src.config import (
     SUPPORTED_LLM_MODELS, DEFAULT_LLM_MODEL, PROXY_CONFIG, OLLAMA_BASE_URL,
     MAX_OPTIMIZATION_CYCLES, SUPPORTED_OBJECT_TYPES, DEFAULT_OBJECT_TYPE, VIEW_DECOMPOSITION_THRESHOLD,
-    SUPPORTED_EMBEDDING_MODELS, DEFAULT_EMBEDDING_MODEL, GATEWAY_EMBEDDING_URL,
-    GATEWAY_EMBEDDING_API_KEY  # RAG/Embedding settings
+    SUPPORTED_EMBEDDING_MODELS, DEFAULT_EMBEDDING_MODEL
 )
 
 st.set_page_config(layout="wide", page_title="Oracle to Snowflake Migrator")
@@ -70,26 +69,13 @@ def main():
             DEFAULT_EMBEDDING_MODEL) if DEFAULT_EMBEDDING_MODEL in SUPPORTED_EMBEDDING_MODELS else 0,
         key="embedding_model_selector"
     )
+
     # Conditionally display inputs for custom gateway embedding model
     if selected_embedding_model == "company-embedding-gateway":
-        st.sidebar.info("Configure your company's LLM gateway for embeddings.")
-        gateway_url_input = st.sidebar.text_input(
-            "Gateway Embedding URL:",
-            value=os.getenv("GATEWAY_EMBEDDING_URL", GATEWAY_EMBEDDING_URL),
-            key="gateway_embedding_url_input"
-        )
-        gateway_api_key_input = st.sidebar.text_input(
-            "Gateway API Key (optional):",
-            type="password",
-            value=os.getenv("GATEWAY_EMBEDDING_API_KEY", GATEWAY_EMBEDDING_API_KEY),
-            key="gateway_embedding_api_key_input"
-        )
-        # Update environment variables for the EmbeddingFactory to pick up
-        os.environ['GATEWAY_EMBEDDING_URL'] = gateway_url_input
-        if gateway_api_key_input:
-            os.environ['GATEWAY_EMBEDDING_API_KEY'] = gateway_api_key_input
-        else:  # Clear if input is empty
-            if 'GATEWAY_EMBEDDING_API_KEY' in os.environ: del os.environ['GATEWAY_EMBEDDING_API_KEY']
+        st.sidebar.markdown(
+            "*(Note: For 'company-embedding-gateway', URL and API Key are assumed to be handled internally by your SDK or pre-configured.)*"
+            )
+        # Removed URL and API key inputs, as they are handled internally by SDK.
 
     # Optimization Cycles Input
     st.sidebar.subheader("Optimization Settings")
@@ -114,7 +100,7 @@ def main():
     )
 
     # Proxy configuration (optional)
-    if st.sidebar.checkbox("Use Proxy Settings"):
+    if st.sidebar.checkbox("Use Proxy Settings", value=True):
         st.sidebar.warning("Note: Proxy settings are applied globally by setting OS environment variables.")
         proxy_http = st.sidebar.text_input("HTTP Proxy (e.g., http://user:pass@host:port)",
                                            value=PROXY_CONFIG.get("http_proxy", ""))
@@ -166,56 +152,52 @@ def main():
         else:
             st.info(
                 f"No Oracle {selected_object_type} DDL uploaded. You can provide it manually below or use the default example.")
-            default_oracle_code_value = ""
-            if selected_object_type == "Procedure":
-                default_oracle_code_value = """
-                CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS (
-                    p_employee_id IN NUMBER,
-                    p_employee_name OUT VARCHAR2,
-                    p_salary OUT NUMBER
-                )
-                IS
-                    v_department_id NUMBER;
-                    CURSOR c_emp IS
-                        SELECT employee_name, salary, department_id
-                        FROM employees
-                        WHERE employee_id = p_employee_id;
-                BEGIN
-                    OPEN c_emp;
-                    FETCH c_emp INTO p_employee_name, p_salary, v_department_id;
-                    IF c_emp%NOTFOUND THEN
-                        RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');
-                    END IF;
-                    CLOSE c_emp;
+            default_oracle_code_value = """
+            CREATE OR REPLACE PROCEDURE GET_EMPLOYEE_DETAILS (
+                p_employee_id IN NUMBER,
+                p_employee_name OUT VARCHAR2,
+                p_salary OUT NUMBER
+            )
+            IS
+                v_department_id NUMBER;
+                CURSOR c_emp IS
+                    SELECT employee_name, salary, department_id
+                    FROM employees
+                    WHERE employee_id = p_employee_id;
+            BEGIN
+                OPEN c_emp;
+                FETCH c_emp INTO p_employee_name, p_salary, v_department_id;
+                IF c_emp%NOTFOUND THEN
+                    RAISE_APPLICATION_ERROR(-20001, 'Employee not found.');
+                END IF;
+                CLOSE c_emp;
 
-                    UPDATE employees SET last_access_date = SYSDATE WHERE employee_id = p_employee_id;
+                UPDATE employees SET last_access_date = SYSDATE WHERE employee_id = p_employee_id;
 
-                    EXCEPTION
-                        WHEN OTHERS THEN
-                            DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
-                            RAISE;
-                END;
-                """
-            elif selected_object_type == "View":
-                default_oracle_code_value = """
-                CREATE OR REPLACE VIEW MY_SCHEMA.EMPLOYEE_SALARY_VW AS
-                SELECT /*+ NO_MERGE */
-                    e.employee_id,
-                    e.employee_name,
-                    e.salary,
-                    d.department_name,
-                    ROWNUM as rn
-                FROM
-                    employees e,
-                    departments d
-                WHERE
-                    e.department_id = d.department_id(+)
-                AND
-                    e.salary > (SELECT AVG(salary) FROM employees)
-                AND ROWNUM <= 100
-                ORDER BY e.employee_id
-                WITH READ ONLY;
-                """
+                EXCEPTION
+                    WHEN OTHERS THEN
+                        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+                        RAISE;
+            END;
+            """ if selected_object_type == "Procedure" else """
+            CREATE OR REPLACE VIEW MY_SCHEMA.EMPLOYEE_SALARY_VW AS
+            SELECT /*+ NO_MERGE */
+                e.employee_id,
+                e.employee_name,
+                e.salary,
+                d.department_name,
+                ROWNUM as rn
+            FROM
+                employees e,
+                departments d
+            WHERE
+                e.department_id = d.department_id(+)
+            AND
+                e.salary > (SELECT AVG(salary) FROM employees)
+            AND ROWNUM <= 100
+            ORDER BY e.employee_id
+            WITH READ ONLY;
+            """
 
             manual_oracle_input = st.text_area(f"Or paste Oracle {selected_object_type} DDL here:",
                                                value=default_oracle_code_value, height=300, key="manual_oracle_input")
@@ -252,17 +234,17 @@ def main():
             accept_multiple_files=False,
             key="samples_uploader"
         )
-        sample_procedures_content = ""  # This will actually store sample DDL for both procs and views for ingestion
+        sample_content_for_ingestion = ""  # This will actually store sample DDL for both procs and views for ingestion
         if uploaded_samples:
             samples_path = save_uploaded_file(uploaded_samples, "samples")
-            sample_procedures_content = read_file_content(samples_path)
+            sample_content_for_ingestion = read_file_content(samples_path)
             st.success(f"Sample Snowflake {selected_object_type}s file uploaded.")
         else:
             st.info(
                 f"No sample {selected_object_type}s uploaded. Using default example for {selected_object_type}s for ingestion.")
-            sample_procedures_content = read_file_content(sample_file_path_default)
+            sample_content_for_ingestion = read_file_content(sample_file_path_default)
         # Display the content, but the actual ingestion into vector store happens via the script/API
-        st.text_area(f"Review/Edit Sample {selected_object_type}s (for ingestion):", value=sample_procedures_content,
+        st.text_area(f"Review/Edit Sample {selected_object_type}s (for ingestion):", value=sample_content_for_ingestion,
                      height=200, key="samples_editor")
 
         # Add a button to ingest user-provided samples into ChromaDB
@@ -285,10 +267,10 @@ def main():
                 chroma_manager.add_documents([guidelines_doc])
 
                 # Ingest the currently displayed sample code content
-                if sample_procedures_content.strip():
+                if sample_content_for_ingestion.strip():
                     sample_doc = prepare_migration_pair_document(
                         oracle_code="",  # No Oracle for just sample code, just Snowflake
-                        snowflake_code=sample_procedures_content,
+                        snowflake_code=sample_content_for_ingestion,
                         object_type=selected_object_type,
                         source_name=f"ui_uploaded_sample_{selected_object_type}"
                     )
@@ -347,7 +329,7 @@ def main():
         logger.info(
             f"Migration initiated for {len(oracle_code_inputs)} Oracle {selected_object_type}(s) using LLM: {selected_llm_model} and Embedding: {selected_embedding_model}")
 
-        llm_factory = LLMManager(selected_llm_model)  # Use LLMFactory
+        llm_factory = LLMFactory(selected_llm_model)  # Use LLMFactory
         try:
             llm_instance = llm_factory.get_llm()
             # Pass object_type to compile_migration_graph
@@ -472,7 +454,7 @@ def main():
 
 #### LLM Reflection/Optimization Notes
 ```
-{result.get("reflection", "No reflection notes.")}
+{json.dumps(result.get("reflection", "No reflection notes."), indent=2)}
 ```
 
 #### Errors/Warnings
